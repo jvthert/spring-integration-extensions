@@ -68,20 +68,28 @@ public class ObjectGrant {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
+
 		ObjectGrant other = (ObjectGrant) obj;
+
 		if (grantee == null) {
-			if (other.grantee != null)
+			if (other.grantee != null) {
 				return false;
-		} else if (!grantee.equals(other.grantee))
+			}
+		} else if (!grantee.equals(other.grantee)){
 			return false;
-		if (permission != other.permission)
-			return false;
-		return true;
+		}
+
+		return permission == other.permission;
 	}
 }

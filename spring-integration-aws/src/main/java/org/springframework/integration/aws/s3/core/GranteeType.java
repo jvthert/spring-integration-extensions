@@ -41,5 +41,5 @@ public enum GranteeType {
 	/**
 	 * These represent come constants representing some predefined groups by Amazon S3
 	 */
-	GROUP_GRANTEE_TYPE;
+	GROUP_GRANTEE_TYPE
 }

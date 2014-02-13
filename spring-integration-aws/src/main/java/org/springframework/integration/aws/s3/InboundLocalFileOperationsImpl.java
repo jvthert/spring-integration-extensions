@@ -223,7 +223,7 @@ public class InboundLocalFileOperationsImpl implements
 				logger.debug("Renaming of file " + from.getName() + " to "
 						+ to.getName() + " successful");
 			}
-			isSuccessful = isRenameSuccessful;
+			isSuccessful = true;
 		}
 		else {
 			if(logger.isWarnEnabled()) {

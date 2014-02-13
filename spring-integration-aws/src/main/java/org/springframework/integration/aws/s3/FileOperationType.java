@@ -24,5 +24,5 @@ package org.springframework.integration.aws.s3;
  *
  */
 public enum FileOperationType {
-	CREATE,UPDATE,RENAME,DELETE;
+	CREATE,UPDATE,RENAME,DELETE
 }

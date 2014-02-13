@@ -2,7 +2,8 @@ description = 'Spring Integration AWS Support'
 
 buildscript {
 	repositories {
-		maven { url 'https://repo.springsource.org/plugins-snapshot' }
+        maven { url 'http://vergaarbak.office:8081/nexus/content/groups/public/' }
+        maven { url 'http://vergaarbak.office:8081/nexus/content/groups/snapshots-remote/' }
 	}
 }
 
@@ -14,12 +15,12 @@ apply plugin: 'idea'
 group = 'org.springframework.integration'
 
 repositories {
-	maven { url 'http://repo.springsource.org/libs-milestone' }
-	maven { url 'http://repo.springsource.org/plugins-release' }
+    maven { url 'http://vergaarbak.office:8081/nexus/content/groups/public/' }
+    maven { url 'http://vergaarbak.office:8081/nexus/content/groups/snapshots-remote/' }
 }
 
-sourceCompatibility=1.6
-targetCompatibility=1.6
+sourceCompatibility=1.7
+targetCompatibility=1.7
 
 // See http://www.gradle.org/docs/current/userguide/dependency_management.html#sub:configurations
 // and http://www.gradle.org/docs/current/dsl/org.gradle.api.artifacts.ConfigurationContainer.html
@@ -28,17 +29,17 @@ configurations {
 }
 
 ext {
-	apacheHttpclientVersion='4.1.1'
-	awsSdkVersion='1.3.32'
-	commonsCodecVersion='1.5'
-	commonsIoVersion='2.0.1'
+	apacheHttpclientVersion='4.3'
+	awsSdkVersion='1.7.1'
+	commonsCodecVersion='1.9'
+	commonsIoVersion='2.4'
 	javaMailVersion='1.4.4'
 	jacksonVersion='1.9.11'
 	junitVersion='4.11'
 	log4jVersion = '1.2.12'
 	mockitoVersion='1.9.0'
-	springIntegrationVersion = '2.2.2.RELEASE'
-	springVersion = '3.1.4.RELEASE'
+	springIntegrationVersion = '4.0.0.M3'
+	springVersion = '4.0.1.RELEASE'
 
 	idPrefix = 'aws'
 
@@ -77,7 +78,7 @@ dependencies {
 	testCompile "org.springframework:spring-test:$springVersion"
 	testCompile "log4j:log4j:$log4jVersion"
 
-	jacoco group: "org.jacoco", name: "org.jacoco.agent", version: "0.6.2.201302030002", classifier: "runtime"
+	jacoco group: "org.jacoco", name: "org.jacoco.agent", version: "0.6.4.201312101107", classifier: "runtime"
 
 }
 
@@ -270,5 +271,5 @@ task dist(dependsOn: assemble) {
 
 task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '1.6'
+	gradleVersion = '1.11'
 }

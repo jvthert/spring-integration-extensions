@@ -180,7 +180,7 @@ public class InboundFileSynchronizationImplTests {
 		File fileTwo = new File(path);
 		path = String.format("%s%s%s%s%s%s%s",
 				rootDirectoryPath,File.separator,"sub1",File.separator,"sub11",File.separator,"test.txt");
-		File fileThree = new File(path);;
+		File fileThree = new File(path);
 		path = String.format("%s%s%s%s%s",
 				rootDirectoryPath,File.separator,"sub2",File.separator,"test.txt");
 		File fileFour = new File(path);

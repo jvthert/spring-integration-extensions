@@ -24,7 +24,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 
 /**
- * The test class for {@link AbstractAmazonWSClientFactory}
+ * The test class for {@link AbstractAWSClientFactory}
  *
  * @author Amol Nayak
  *

@@ -40,5 +40,5 @@ public enum ObjectPermissions {
 	 * Indicates the grantee has permissions to write the Access control permissions of the
 	 * Object in S3
 	 */
-	WRITE_ACP;
+	WRITE_ACP
 }

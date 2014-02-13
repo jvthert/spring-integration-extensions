@@ -70,6 +70,6 @@
 		class="org.springframework.integration.aws.s3.config.xml.AmazonS3DummyOperations"/>
 
 	<bean id="customFileNameGenerator"
-		class="org.springframework.integration.aws.s3.config.xml.AmazonS3OutboundChannelAdapterParserTests.DummyFileNameGenerator"/>
+		class="org.springframework.integration.aws.s3.config.xml.AmazonS3OutboundChannelAdapterParserTests$DummyFileNameGenerator"/>
 
 </beans>

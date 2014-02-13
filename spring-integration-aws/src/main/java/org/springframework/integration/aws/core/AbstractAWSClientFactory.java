@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.util.StringUtils;
-
 import com.amazonaws.AmazonWebServiceClient;
+import org.springframework.util.StringUtils;
 
 
 /**

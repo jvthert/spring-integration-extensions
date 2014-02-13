@@ -31,7 +31,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
-import com.amazonaws.services.simpleemail.AWSJavaMailTransport;
+import com.amazonaws.services.simpleemail. AWSJavaMailTransport;
 
 /**
  * The implementation class for sending mail using the Amazon SES service

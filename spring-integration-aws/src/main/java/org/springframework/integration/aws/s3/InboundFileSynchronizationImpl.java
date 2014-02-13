@@ -213,7 +213,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 				return;
 			}
 			String eTag = summary.getETag();
-			String md5Hex = null;
+			String md5Hex = "";
 			if(isEtagMD5Hash(eTag)) {
 				//Single thread upload
 				try {
@@ -244,9 +244,8 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 						logger.error("Exception encountered while generating the MD5 hash for the file " + file.getAbsolutePath(), e);
 					}
 					try {
-						String remoteHexMD5 = new String(
-								encodeHex(
-										decodeBase64(b64MD5.getBytes("UTF-8"))));
+						String remoteHexMD5 = encodeHex(decodeBase64(b64MD5.getBytes("UTF-8")));
+
 						if(!md5Hex.equals(remoteHexMD5)) {
 							//Update only if the local file is not same as remote file
 							try {
@@ -259,8 +258,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 					} catch (UnsupportedEncodingException e) {
 						//Should never get this, suppress
 					}
-				}
-				else {
+				} else {
 					//Forcefully update the file
 					try {
 						fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
@@ -281,11 +279,8 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 	 * @param eTag
 	 */
 	private boolean isEtagMD5Hash(String eTag) {
-		if (eTag == null || eTag.length() != 32) {
-			return false;
-		}
-		return eTag.replaceAll("[a-f0-9A-F]", "").length() == 0;
-
+		return !(eTag == null || eTag.length() != 32) &&
+				eTag.replaceAll("[a-f0-9A-F]", "").length() == 0;
 	}
 
 	/* (non-Javadoc)
