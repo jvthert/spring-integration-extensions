@@ -50,7 +50,7 @@ public class DefaultFileNameGenerationStrategy extends AbstractExpressionEvaluat
 	private volatile String fileNameExpression = "headers['" + AmazonS3MessageHeaders.FILE_NAME + "']" ;
 
 	/* (non-Javadoc)
-	 * @see org.springframework.integration.aws.s3.FileNameGenerationStrategy#generateFileName(org.springframework.integration.Message)
+	 * @see org.springframework.integration.aws.s3.FileNameGenerationStrategy#generateFileName(org.springframework.messaging.Message)
 	 */
 	public String generateFileName(Message<?> message) {
 		String generatedFileName;

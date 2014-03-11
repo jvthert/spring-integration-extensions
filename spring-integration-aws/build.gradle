@@ -29,7 +29,7 @@ configurations {
 }
 
 ext {
-	apacheHttpclientVersion='4.3'
+    apacheHttpclientVersion='4.3'
 	awsSdkVersion='1.7.1'
 	commonsCodecVersion='1.9'
 	commonsIoVersion='2.4'

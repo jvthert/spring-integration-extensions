@@ -15,10 +15,6 @@
  */
 package org.springframework.integration.aws.s3;
 
-import static org.springframework.integration.aws.core.AWSCommonUtils.decodeBase64;
-import static org.springframework.integration.aws.core.AWSCommonUtils.encodeHex;
-import static org.springframework.integration.aws.core.AWSCommonUtils.getContentsMD5AsBytes;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,63 +31,63 @@ import org.springframework.integration.aws.s3.core.PaginatedObjectsView;
 import org.springframework.integration.aws.s3.core.S3ObjectSummary;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
+import static org.springframework.integration.aws.core.AWSCommonUtils.*;
 
 /**
  * The implementation for {@link InboundFileSynchronizer}, this implementation will use
  * the {@link AmazonS3Operations} to list the objects in the remote bucket on invocation of
  * the {@link #synchronizeToLocalDirectory(File, String, String)}. The listed objects will then
  * be checked against the
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
-public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,InitializingBean {
+public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, InitializingBean {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
 	public static final String CONTENT_MD5 = "Content-MD5";
+
 	private final AmazonS3Operations client;
-	private volatile int maxObjectsPerBatch = 100;		//default
+
+	private volatile int maxObjectsPerBatch = 100;        //default
+
 	private final InboundLocalFileOperations fileOperations;
+
 	private volatile FileNameFilter filter;
+
 	private volatile String fileWildcard;
+
 	private volatile String fileNameRegex;
+
 	private final Lock lock = new ReentrantLock();
+
 	private volatile boolean acceptSubFolders;
 
 	/**
-	 *
 	 * @param client
 	 */
 	public InboundFileSynchronizationImpl(AmazonS3Operations client,
-						InboundLocalFileOperations fileOperations) {
-		Assert.notNull(client,"AmazonS3Client should be non null");
-		Assert.notNull(fileOperations,"fileOperations should be non null");
+										  InboundLocalFileOperations fileOperations) {
+		Assert.notNull(client, "AmazonS3Client should be non null");
+		Assert.notNull(fileOperations, "fileOperations should be non null");
 		this.client = client;
 		this.fileOperations = fileOperations;
 	}
 
-
-
 	public void afterPropertiesSet() throws Exception {
 		Assert.isTrue(!(StringUtils.hasText(fileWildcard) && StringUtils.hasText(fileNameRegex)),
-			"Only one of the file name wildcard string or file name regex can be specified");
+				"Only one of the file name wildcard string or file name regex can be specified");
 
-		if(StringUtils.hasText(fileWildcard)) {
+		if (StringUtils.hasText(fileWildcard)) {
 			filter = new WildcardFileNameFilter(fileWildcard);
-		}
-		else if(StringUtils.hasText(fileNameRegex)) {
+		} else if (StringUtils.hasText(fileNameRegex)) {
 			filter = new RegexFileNameFilter(fileNameRegex);
-		}
-		else {
-			filter = new AlwaysTrueFileNamefilter();	//Match all
+		} else {
+			filter = new AlwaysTrueFileNamefilter();    //Match all
 		}
 
-		if(acceptSubFolders) {
-			((AbstractFileNameFilter)filter).setAcceptSubFolders(true);
+		if (acceptSubFolders) {
+			((AbstractFileNameFilter) filter).setAcceptSubFolders(true);
 			fileOperations.setCreateDirectoriesIfRequired(true);
 		}
 	}
@@ -103,125 +98,122 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 	 */
 
 	public void synchronizeToLocalDirectory(File localDirectory, String bucketName, String remoteFolder) {
-			if(!lock.tryLock())	{
-				if(logger.isInfoEnabled()) {
-					logger.info("Sync already in progess");
-				}
-				//Prevent concurrent synchronization requests
-				return;
+		if (!lock.tryLock()) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Sync already in progess");
+			}
+			//Prevent concurrent synchronization requests
+			return;
+		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Starting sync with local directory");
+		}
+		//Below sync can take long, above lock ensures only one thread is synchronizing
+		try {
+			if (remoteFolder != null && "/".equals(remoteFolder)) {
+				remoteFolder = null;
 			}
 
-			if(logger.isInfoEnabled()) {
-				logger.info("Starting sync with local directory");
+			//Set the remote folder for the filter
+			if (filter instanceof AbstractFileNameFilter) {
+				((AbstractFileNameFilter) filter).setFolderName(remoteFolder);
 			}
-			//Below sync can take long, above lock ensures only one thread is synchronizing
-			try {
-				if(remoteFolder != null && "/".equals(remoteFolder)) {
-					remoteFolder = null;
-				}
 
-				//Set the remote folder for the filter
-				if(filter instanceof AbstractFileNameFilter) {
-					((AbstractFileNameFilter)filter).setFolderName(remoteFolder);
-				}
-
-				String nextMarker = null;
-				do {
-					PaginatedObjectsView paginatedView = client.listObjects(bucketName, remoteFolder,nextMarker,maxObjectsPerBatch);
-					if(paginatedView == null)
-						break;	//No files to sync
-					nextMarker = paginatedView.getNextMarker();
-					List<S3ObjectSummary> summaries = paginatedView.getObjectSummary();
-					for(S3ObjectSummary summary:summaries) {
-						String key = summary.getKey();
-						if(key.endsWith("/")) {
-							continue;
-						}
-						if(!filter.accept(key))
-							continue;
-						//The folder is the root as the key is relative to bucket
-						AmazonS3Object s3Object = client.getObject(bucketName, "/", key);
-						synchronizeObjectWithFile(localDirectory,summary,s3Object);
+			String nextMarker = null;
+			do {
+				PaginatedObjectsView paginatedView = client.listObjects(bucketName, remoteFolder, nextMarker, maxObjectsPerBatch);
+				if (paginatedView == null)
+					break;    //No files to sync
+				nextMarker = paginatedView.getNextMarker();
+				List<S3ObjectSummary> summaries = paginatedView.getObjectSummary();
+				for (S3ObjectSummary summary : summaries) {
+					String key = summary.getKey();
+					if (key.endsWith("/")) {
+						continue;
 					}
-				} while(nextMarker != null);
-
-			} finally {
-				lock.unlock();
-				if(logger.isInfoEnabled()) {
-					logger.info("Sync completed");
+					if (!filter.accept(key))
+						continue;
+					//The folder is the root as the key is relative to bucket
+					AmazonS3Object s3Object = client.getObject(bucketName, "/", key);
+					synchronizeObjectWithFile(localDirectory, summary, s3Object);
 				}
+			} while (nextMarker != null);
+		} finally {
+			lock.unlock();
+			if (logger.isInfoEnabled()) {
+				logger.info("Sync completed");
 			}
+		}
 	}
+
 	/**
 	 * Synchronizes the Object with the File on the local file system
 	 * @param localDirectory
 	 * @param summary
 	 */
-	private void synchronizeObjectWithFile(File localDirectory,S3ObjectSummary summary,
-			AmazonS3Object s3Object) {
+	private void synchronizeObjectWithFile(File localDirectory, S3ObjectSummary summary,
+										   AmazonS3Object s3Object) {
 		//Get the complete object data
 
 		String key = summary.getKey();
-		if(key.endsWith("/")) {
+		if (key.endsWith("/")) {
 			return;
 		}
 		int lastIndex = key.lastIndexOf("/");
 
 		String fileName = key.substring(lastIndex + 1);
 		String filePath = localDirectory.getAbsolutePath();
-		if(!filePath.endsWith(File.separator)) {
+		if (!filePath.endsWith(File.separator)) {
 			filePath += File.separator;
 		}
 
 		File baseDirectory;
-		if(lastIndex > 0) {
+		if (lastIndex > 0) {
 			//there could very well be previous '/' and thus nested sub folders
 			String prefixKey = key.substring(0, lastIndex);
 			String[] folders = prefixKey.split("/");
-			if(folders.length > 0) {
-				for(String folder:folders) {
+			if (folders.length > 0) {
+				for (String folder : folders) {
 					filePath = filePath + folder + File.separator;
 				}
 				//create the directory structure
 				baseDirectory = new File(filePath);
 				baseDirectory.mkdirs();
-			}
-			else {
+			} else {
 				baseDirectory = localDirectory;
 			}
-		}
-		else {
+		} else {
 			baseDirectory = localDirectory;
 		}
 
 		File file = new File(filePath + fileName);
-		if(!file.exists()) {
+		if (!file.exists()) {
 			//File doesnt exist, write the contents to it
 			try {
-				fileOperations.writeToFile(baseDirectory, fileName,s3Object.getInputStream());
+				fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
 			} catch (IOException e) {
 				logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
 				//continue with next file.
 			}
-		}
-		else {
+		} else {
 			//Synchronize a file that exists
-			if(!file.isFile()) {
-				if(logger.isWarnEnabled()) {
+			if (!file.isFile()) {
+				if (logger.isWarnEnabled()) {
 					logger.warn("The file " + file.getAbsolutePath() + " is not a regular file, probably a directory, ");
 				}
 				return;
 			}
 			String eTag = summary.getETag();
 			String md5Hex = "";
-			if(isEtagMD5Hash(eTag)) {
+			if (isEtagMD5Hash(eTag)) {
 				//Single thread upload
 				try {
 					md5Hex = encodeHex(getContentsMD5AsBytes(file));
 				} catch (UnsupportedEncodingException e) {
 					logger.error("Exception encountered while generating the MD5 hash for the file " + file.getAbsolutePath(), e);
 				}
-				if(!eTag.equals(md5Hex)) {
+				if (!eTag.equals(md5Hex)) {
 					//The local file is different than the one on S3, could be latest but we will still
 					//sync this with the copy on S3
 					try {
@@ -230,13 +222,12 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 						logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
 					}
 				}
-			}
-			else {
+			} else {
 				//Multi part upload
 				//Get the MD5 hash from the headers
 				Map<String, String> userMetaData = s3Object.getUserMetaData();
 				String b64MD5 = userMetaData.get(CONTENT_MD5);
-				if(b64MD5 != null) {
+				if (b64MD5 != null) {
 					//Need to convert to Hex from Base64
 					try {
 						md5Hex = encodeHex(getContentsMD5AsBytes(file));
@@ -246,7 +237,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 					try {
 						String remoteHexMD5 = encodeHex(decodeBase64(b64MD5.getBytes("UTF-8")));
 
-						if(!md5Hex.equals(remoteHexMD5)) {
+						if (!md5Hex.equals(remoteHexMD5)) {
 							//Update only if the local file is not same as remote file
 							try {
 								fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
@@ -254,7 +245,6 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 								logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
 							}
 						}
-
 					} catch (UnsupportedEncodingException e) {
 						//Should never get this, suppress
 					}
@@ -275,7 +265,6 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 	 * has to be 32 characters in length, also it should contain only hex characters
 	 * In case of multi uploads, it is observed that the eTag contains a "-",
 	 * and hence this method will return false.
-	 *
 	 * @param eTag
 	 */
 	private boolean isEtagMD5Hash(String eTag) {
@@ -288,7 +277,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer,I
 	 */
 
 	public void setSynchronizingBatchSize(int batchSize) {
-		if(batchSize > 0)
+		if (batchSize > 0)
 			this.maxObjectsPerBatch = batchSize;
 	}
 
