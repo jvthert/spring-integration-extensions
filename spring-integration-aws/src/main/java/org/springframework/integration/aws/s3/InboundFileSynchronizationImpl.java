@@ -17,6 +17,7 @@ package org.springframework.integration.aws.s3;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
@@ -123,17 +124,18 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 			String nextMarker = null;
 			do {
 				PaginatedObjectsView paginatedView = client.listObjects(bucketName, remoteFolder, nextMarker, maxObjectsPerBatch);
-				if (paginatedView == null)
-					break;    //No files to sync
+				if (paginatedView == null) {
+					break; // No results
+				}
+
 				nextMarker = paginatedView.getNextMarker();
 				List<S3ObjectSummary> summaries = paginatedView.getObjectSummary();
 				for (S3ObjectSummary summary : summaries) {
 					String key = summary.getKey();
-					if (key.endsWith("/")) {
+					if (key.endsWith("/") || !filter.accept(key)) {
 						continue;
 					}
-					if (!filter.accept(key))
-						continue;
+
 					//The folder is the root as the key is relative to bucket
 					AmazonS3Object s3Object = client.getObject(bucketName, "/", key);
 					synchronizeObjectWithFile(localDirectory, summary, s3Object);
@@ -179,7 +181,9 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 				}
 				//create the directory structure
 				baseDirectory = new File(filePath);
-				baseDirectory.mkdirs();
+				if (baseDirectory.mkdirs()) {
+					logger.info("Created new folder: " + baseDirectory);
+				}
 			} else {
 				baseDirectory = localDirectory;
 			}
@@ -257,6 +261,14 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 					}
 				}
 			}
+		}
+
+		/* Finally clean up S3Object in order to release the HTTP connection lease */
+		final InputStream is = s3Object.getInputStream();
+		try {
+			if (is != null) is.close();
+		} catch (IOException e) {
+			logger.info("Unable to close connection");
 		}
 	}
 

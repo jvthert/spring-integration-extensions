@@ -34,8 +34,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * The message source used to receive the File instances stored on the local file system
- * synchronized from the S3
+ * The message source used to receive the File instances stored on the local file system synchronized from the S3
  * @author Amol Nayak
  * @since 0.5
  */
@@ -43,22 +42,36 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 		implements MessageSource<File>, FileEventHandler {
 
 	private volatile InboundFileSynchronizer synchronizer;
+
 	private volatile String bucket;
+
 	private volatile String remoteDirectory;
+
 	private volatile File directory;
+
 	private volatile AWSCredentials credentials;
+
 	private volatile String temporarySuffix = ".writing";
- 	private volatile int maxObjectsPerBatch;
+
+	private volatile int maxObjectsPerBatch;
+
 	private volatile String fileNameWildcard;
- 	private volatile String fileNameRegex;
+
+	private volatile String fileNameRegex;
+
 	private volatile BlockingQueue<File> filesQueue;
+
 	private volatile AmazonS3Operations s3Operations;
+
 	private volatile boolean acceptSubFolders;
- 	private volatile String awsEndpoint;
+
+	private volatile String awsEndpoint;
 
 	//We will hard code the queue capacity here
 	private static final int QUEUE_CAPACITY = 1024;
-	private volatile StandardEvaluationContext ctx;
+
+	private volatile StandardEvaluationContext evalContext;
+
 	private volatile Expression directoryExpression;
 
 	public Message<File> receive() {
@@ -79,18 +92,24 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	protected void onInit() throws Exception {
 		Assert.notNull(directoryExpression, "Local directory to synchronize to is not set");
 
-		ctx = new StandardEvaluationContext();
+		evalContext = new StandardEvaluationContext();
 		BeanFactory factory = getBeanFactory();
 		if (factory != null) {
-			ctx.setBeanResolver(new BeanFactoryResolver(factory));
+			evalContext.setBeanResolver(new BeanFactoryResolver(factory));
 		}
-		String directoryPath = directoryExpression.getValue(ctx, String.class);
+		String directoryPath = directoryExpression.getValue(evalContext, String.class);
 		directory = new File(directoryPath);
+
+
+		// Make sure the directory is created
+		if (directory.mkdirs()) {
+			logger.info("Target directories created.");
+		}
 
 		Assert.notNull(directory, "Please provide a valid local directory to synchronize the remote files");
 
 //		TODO: Uncomment this once we start supporting auto-create-local-directory
-//		Assert.isTrue(directory.exists(), String.format("Provided directory %s does not exist", directoryPath));
+		Assert.isTrue(directory.exists(), String.format("Provided directory %s does not exist", directoryPath));
 
 		Assert.isTrue(directory.isDirectory(), String.format("Provided path %s is not a directory", directoryPath));
 
@@ -139,8 +158,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * The temporary suffix that would be used to indicate that the file is being writtem and the operation
-	 * is not yet complete
+	 * The temporary suffix that would be used to indicate that the file is being writtem and the operation is not yet complete
 	 * @param temporarySuffix
 	 */
 	public void setTemporarySuffix(String temporarySuffix) {
@@ -149,8 +167,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * The maximum number of objects those will be retrieved in one batch from Amazon S3 bucket
-	 * as part of the listOperation
+	 * The maximum number of objects those will be retrieved in one batch from Amazon S3 bucket as part of the listOperation
 	 * @param maxObjectsPerBatch
 	 */
 	public void setMaxObjectsPerBatch(int maxObjectsPerBatch) {
@@ -159,8 +176,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * Sets the file's wildcard pattern that would be used to match the objects in S3 bucket
-	 * This attribute is mutually exclusive to fileName regex.
+	 * Sets the file's wildcard pattern that would be used to match the objects in S3 bucket This attribute is mutually exclusive to fileName regex.
 	 * @param fileNameWildcard Must not be empty.
 	 */
 	public void setFileNameWildcard(String fileNameWildcard) {
@@ -170,8 +186,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * Sets the regex to be used to match the objects in S3 bucket. This attribute is mutually exclusive
-	 * to fileName regex.
+	 * Sets the regex to be used to match the objects in S3 bucket. This attribute is mutually exclusive to fileName regex.
 	 * @param fileNameRegex
 	 */
 	public void setFileNameRegex(String fileNameRegex) {
@@ -190,8 +205,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * Sets the remote directory, this is the directory relative to the provided bucket
-	 * in S3.
+	 * Sets the remote directory, this is the directory relative to the provided bucket in S3.
 	 * @param remoteDirectory
 	 */
 	public void setRemoteDirectory(String remoteDirectory) {
@@ -209,8 +223,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * Sets the {@link AmazonS3Operations} instance that would be used for the receiving
-	 * the objects and listing the objects in the bucket.
+	 * Sets the {@link AmazonS3Operations} instance that would be used for the receiving the objects and listing the objects in the bucket.
 	 * @param s3Operations
 	 */
 	public void setS3Operations(AmazonS3Operations s3Operations) {
@@ -219,8 +232,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * Set to true if you want the subfolders of the given remote folder to be synchronized to the
-	 * local directory.
+	 * Set to true if you want the subfolders of the given remote folder to be synchronized to the local directory.
 	 * @param acceptSubFolders
 	 */
 	public void setAcceptSubFolders(boolean acceptSubFolders) {
@@ -228,8 +240,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	}
 
 	/**
-	 * The AWS region's endpoint whose bucket(and the subfolder if any) will be synchronized
-	 * by this adapter
+	 * The AWS region's endpoint whose bucket(and the subfolder if any) will be synchronized by this adapter
 	 * @param awsEndpoint
 	 */
 	public void setAwsEndpoint(String awsEndpoint) {

@@ -20,24 +20,15 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
-
 import org.springframework.util.Assert;
-
-
 
 /**
  * The Amazon S3 Object representing the Object in S3
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AmazonS3Object implements Serializable {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -832622119907619624L;
 
 	private Map<String, String> userMetaData;
@@ -52,17 +43,16 @@ public class AmazonS3Object implements Serializable {
 
 	/**
 	 * The default constructor
-	 *
 	 * @param userMetaData
 	 * @param metaData
 	 * @param inputStream
 	 */
 	public AmazonS3Object(Map<String, String> userMetaData,
-			Map<String, Object> metaData, InputStream inputStream,File fileSource,AmazonS3ObjectACL objectACL) {
-		if(userMetaData != null)
+						  Map<String, Object> metaData, InputStream inputStream, File fileSource, AmazonS3ObjectACL objectACL) {
+		if (userMetaData != null)
 			this.userMetaData = Collections.unmodifiableMap(userMetaData);
 
-		if(metaData != null)
+		if (metaData != null)
 			this.metaData = Collections.unmodifiableMap(metaData);
 
 		Assert.isTrue((inputStream == null) ^ (fileSource == null),
@@ -74,19 +64,16 @@ public class AmazonS3Object implements Serializable {
 	}
 
 	/**
-	 * The constructor that delegates to {@link #AmazonS3Object(Map, Map, InputStream, File, AmazonS3ObjectACL)}
-	 * with null {@link AmazonS3ObjectACL}
-	 *
+	 * The constructor that delegates to {@link #AmazonS3Object(Map, Map, InputStream, File, AmazonS3ObjectACL)} with null {@link AmazonS3ObjectACL}
 	 * @param userMetaData
 	 * @param metaData
 	 * @param inputStream
 	 * @param fileSource
 	 */
 	public AmazonS3Object(Map<String, String> userMetaData,
-			Map<String, Object> metaData, InputStream inputStream,File fileSource) {
-		this(userMetaData,metaData,inputStream,fileSource,null);
+						  Map<String, Object> metaData, InputStream inputStream, File fileSource) {
+		this(userMetaData, metaData, inputStream, fileSource, null);
 	}
-
 
 	/**
 	 * Gets the User Metadata associated with given Amazon S3 object

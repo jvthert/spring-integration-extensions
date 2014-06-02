@@ -43,7 +43,7 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 	 * we maintain a map of endpoint and the {@link AmazonWebServiceClient} instantiated the first time a request
 	 * for the designated endpoint is received
 	 */
-	private final ConcurrentHashMap<String, T> clientMap = new ConcurrentHashMap<String, T>();
+	private final ConcurrentHashMap<String, T> clientMap = new ConcurrentHashMap<>();
 
 	/**
 	 * The String constant for HTTP

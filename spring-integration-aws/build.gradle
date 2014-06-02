@@ -19,8 +19,8 @@ repositories {
     maven { url 'http://vergaarbak.office:8081/nexus/content/groups/snapshots-remote/' }
 }
 
-sourceCompatibility=1.7
-targetCompatibility=1.7
+def sourceCompatibility = 1.7
+def targetCompatibility = 1.7
 
 // See http://www.gradle.org/docs/current/userguide/dependency_management.html#sub:configurations
 // and http://www.gradle.org/docs/current/dsl/org.gradle.api.artifacts.ConfigurationContainer.html
@@ -38,7 +38,7 @@ ext {
 	junitVersion='4.11'
 	log4jVersion = '1.2.12'
 	mockitoVersion='1.9.0'
-	springIntegrationVersion = '4.0.0.M3'
+	springIntegrationVersion = '4.0.0.RELEASE'
 	springVersion = '4.0.1.RELEASE'
 
 	idPrefix = 'aws'
