@@ -16,38 +16,29 @@
 package org.springframework.integration.aws.s3;
 
 import java.io.File;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.messaging.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.integration.util.AbstractExpressionEvaluator;
+import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * The Default file name generation strategy. The strategy does the below steps for file name
- * generation
- * 1. The expression provided for generation of the file name, it is evaluated and
- * if a value is obtained, it is used. By default it used the value present in the
- * file_name header.
- * 2. Else, if the provided payload is of type {@link File}, then the name of the file is used.
- * if the file name ends with the temporary file suffix, the suffix is removed and the
- * remainder of the file is used as the name.
- * 3. If none of the above two are provided, the file name is the <Message Id>.ext
- *
+ * The Default file name generation strategy. The strategy does the below steps for file name generation 1. The expression provided for generation of the file name, it is evaluated
+ * and if a value is obtained, it is used. By default it used the value present in the file_name header. 2. Else, if the provided payload is of type {@link File}, then the name of
+ * the file is used. if the file name ends with the temporary file suffix, the suffix is removed and the remainder of the file is used as the name. 3. If none of the above two are
+ * provided, the file name is the <Message Id>.ext
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class DefaultFileNameGenerationStrategy extends AbstractExpressionEvaluator implements
 		FileNameGenerationStrategy {
 
-	private final Log logger = LogFactory.getLog(DefaultFileNameGenerationStrategy.class);
+	private final static Logger logger = LoggerFactory.getLogger(DefaultFileNameGenerationStrategy.class);
 
 	private volatile String temporarySuffix = ".writing";
 
-	private volatile String fileNameExpression = "headers['" + AmazonS3MessageHeaders.FILE_NAME + "']" ;
+	private volatile String fileNameExpression = "headers['" + AmazonS3MessageHeaders.FILE_NAME + "']";
 
 	/* (non-Javadoc)
 	 * @see org.springframework.integration.aws.s3.FileNameGenerationStrategy#generateFileName(org.springframework.messaging.Message)
@@ -55,37 +46,32 @@ public class DefaultFileNameGenerationStrategy extends AbstractExpressionEvaluat
 	public String generateFileName(Message<?> message) {
 		String generatedFileName;
 		try {
-			String fileName = evaluateExpression(fileNameExpression, message,String.class);
-			if(StringUtils.hasText(fileName)) {
+			String fileName = evaluateExpression(fileNameExpression, message, String.class);
+			if (StringUtils.hasText(fileName)) {
 				return fileName;
 			}
 		} catch (Exception e) {
 			//Some exception while evaluating using expression, continue to the file Name
 			//Ignore
-			logger.warn("Exception while evaluating the expression '"
-								+ fileNameExpression + "' on the message", e);
+			logger.warn("Exception while evaluating the expression '{}' on the message", fileNameExpression, e);
 		}
+
 		Object payload = message.getPayload();
-		if(payload instanceof File) {
-			String fileName = ((File)payload).getName();
-			if(fileName.endsWith(temporarySuffix)) {
+		if (payload instanceof File) {
+			String fileName = ((File) payload).getName();
+			if (fileName.endsWith(temporarySuffix)) {
 				//chop off the temp suffix
-				generatedFileName =  fileName.substring(0, fileName.indexOf(temporarySuffix));
+				generatedFileName = fileName.substring(0, fileName.indexOf(temporarySuffix));
+			} else {
+				generatedFileName = fileName;
 			}
-			else {
-				generatedFileName =  fileName;
-			}
-		}
-		else {
+		} else {
 			//use the default name generated
 			generatedFileName = message.getHeaders().getId() + ".ext";
 		}
-		if(logger.isInfoEnabled()) {
-			logger.info("Generated file name is " + generatedFileName);
-		}
+		logger.info("Generated file name is {}", generatedFileName);
 
 		return generatedFileName;
-
 	}
 
 	public void setTemporarySuffix(String temporarySuffix) {

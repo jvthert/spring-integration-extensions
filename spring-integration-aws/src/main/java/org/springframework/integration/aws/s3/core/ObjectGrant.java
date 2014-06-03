@@ -17,17 +17,14 @@ package org.springframework.integration.aws.s3.core;
 
 /**
  * Represent one Grant for a Grantee and the associated permissions
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class ObjectGrant {
 
 	private final Grantee grantee;
-	private final ObjectPermissions permission;
 
+	private final ObjectPermissions permission;
 
 	/**
 	 * Instantiate an Object grant for the given grantee and with given permissions
@@ -54,7 +51,6 @@ public class ObjectGrant {
 		return permission;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -64,7 +60,6 @@ public class ObjectGrant {
 				+ ((permission == null) ? 0 : permission.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -86,7 +81,7 @@ public class ObjectGrant {
 			if (other.grantee != null) {
 				return false;
 			}
-		} else if (!grantee.equals(other.grantee)){
+		} else if (!grantee.equals(other.grantee)) {
 			return false;
 		}
 

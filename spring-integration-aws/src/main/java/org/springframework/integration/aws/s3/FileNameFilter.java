@@ -17,11 +17,8 @@ package org.springframework.integration.aws.s3;
 
 /**
  * The strategy interface used to filter out file names based on some predetermined criteria
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface FileNameFilter {
 

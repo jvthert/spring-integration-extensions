@@ -17,12 +17,11 @@ package org.springframework.integration.aws.ses.core;
 
 import java.io.InputStream;
 import java.util.Properties;
-
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
-
+import com.amazonaws.services.simpleemail.AWSJavaMailTransport;
 import org.springframework.integration.aws.core.AWSCredentials;
 import org.springframework.integration.aws.core.AWSOperationException;
 import org.springframework.mail.MailException;
@@ -31,22 +30,17 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
-import com.amazonaws.services.simpleemail. AWSJavaMailTransport;
-
 /**
  * The implementation class for sending mail using the Amazon SES service
- *
  * @author Amol Nayak
  * @author Gunnar Hillert
- *
  * @since 0.5
- *
  */
 public class DefaultAmazonSESMailSender implements JavaMailSender {
 
 	public DefaultAmazonSESMailSender(AWSCredentials credentials) {
 
-		if(credentials == null) {
+		if (credentials == null) {
 			throw new AWSOperationException(null, "Credentials cannot be null, provide a non null valid set of credentials");
 		}
 
@@ -61,7 +55,6 @@ public class DefaultAmazonSESMailSender implements JavaMailSender {
 		properties.setProperty(AWSJavaMailTransport.AWS_SECRET_KEY_PROPERTY, credentials.getSecretKey());
 
 		javaMailSender.setJavaMailProperties(properties);
-
 	}
 
 	private JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl() {
@@ -71,7 +64,6 @@ public class DefaultAmazonSESMailSender implements JavaMailSender {
 				throws NoSuchProviderException {
 			return new AWSJavaMailTransport(session, null);
 		}
-
 	};
 
 	@Override
@@ -109,7 +101,6 @@ public class DefaultAmazonSESMailSender implements JavaMailSender {
 	public void send(MimeMessagePreparator mimeMessagePreparator)
 			throws MailException {
 		javaMailSender.send(mimeMessagePreparator);
-
 	}
 
 	@Override
@@ -117,5 +108,4 @@ public class DefaultAmazonSESMailSender implements JavaMailSender {
 			throws MailException {
 		javaMailSender.send(mimeMessagePreparators);
 	}
-
 }

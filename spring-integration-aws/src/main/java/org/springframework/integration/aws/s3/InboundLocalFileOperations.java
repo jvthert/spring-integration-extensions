@@ -21,14 +21,10 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * Interface for performing File Operations on local file system.
- * It supports registering an {@link FileEventHandler} instances that
- * notifies the operations on the file those were performed
- *
+ * Interface for performing File Operations on local file system. It supports registering an {@link FileEventHandler} instances that notifies the operations on the file those were
+ * performed
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface InboundLocalFileOperations {
 
@@ -50,22 +46,18 @@ public interface InboundLocalFileOperations {
 	 */
 	void setTemporaryFileSuffix(String prefix);
 
-
 	/**
 	 * Sets the flag to true if directories given are to be created if not present
-	 *
 	 * @param createDirectoriesIfRequired
 	 */
 	void setCreateDirectoriesIfRequired(boolean createDirectoriesIfRequired);
 
 	/**
-	 * The method will write to the file with the specified name in the specified directory
-	 * from the given {@link InputStream}. Upon completion of the writing the appropriate
-	 * {@link FileEventHandler} instance(s) will be notified with the {@link FileOperationType}
-	 * <i>WRITE<i> and {@link File} instance for the created file.
+	 * The method will write to the file with the specified name in the specified directory from the given {@link InputStream}. Upon completion of the writing the appropriate
+	 * {@link FileEventHandler} instance(s) will be notified with the {@link FileOperationType} <i>WRITE<i> and {@link File} instance for the created file.
 	 * @param directory
 	 * @param fileName
 	 * @param in
 	 */
-	void writeToFile(File directory,String fileName,InputStream in) throws IOException ;
+	void writeToFile(File directory, String fileName, InputStream in) throws IOException;
 }

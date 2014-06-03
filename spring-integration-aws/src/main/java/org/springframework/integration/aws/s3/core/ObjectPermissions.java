@@ -17,11 +17,8 @@ package org.springframework.integration.aws.s3.core;
 
 /**
  * Represents the various types of permissions on the object in S3
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public enum ObjectPermissions {
 
@@ -31,14 +28,12 @@ public enum ObjectPermissions {
 	READ,
 
 	/**
-	 * Indicates the grantee has permissions to read the Access control permissions of the
-	 * Object in S3
+	 * Indicates the grantee has permissions to read the Access control permissions of the Object in S3
 	 */
 	READ_ACP,
 
 	/**
-	 * Indicates the grantee has permissions to write the Access control permissions of the
-	 * Object in S3
+	 * Indicates the grantee has permissions to write the Access control permissions of the Object in S3
 	 */
 	WRITE_ACP
 }

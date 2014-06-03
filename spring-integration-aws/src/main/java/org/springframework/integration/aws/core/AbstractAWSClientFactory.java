@@ -20,28 +20,20 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.amazonaws.AmazonWebServiceClient;
 import org.springframework.util.StringUtils;
 
-
 /**
- * The abstract factory class that will be used by all the client operations to acquire
- * the appropriate implementation of the {@link AmazonWebServiceClient} based on the URL
- * passed to the <i>getClient</i> method
- *
+ * The abstract factory class that will be used by all the client operations to acquire the appropriate implementation of the {@link AmazonWebServiceClient} based on the URL passed
+ * to the <i>getClient</i> method
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient> implements AWSClientFactory<T> {
 
 	/**
-	 * A map storing the {@link AmazonWebServiceClient} endpoint as the key and the SQS Client as the
-	 * value. Since setting the endpoint is not a thread safe operation once the client is instantiated,
-	 * we maintain a map of endpoint and the {@link AmazonWebServiceClient} instantiated the first time a request
-	 * for the designated endpoint is received
+	 * A map storing the {@link AmazonWebServiceClient} endpoint as the key and the SQS Client as the value. Since setting the endpoint is not a thread safe operation once the
+	 * client is instantiated, we maintain a map of endpoint and the {@link AmazonWebServiceClient} instantiated the first time a request for the designated endpoint is received
 	 */
 	private final ConcurrentHashMap<String, T> clientMap = new ConcurrentHashMap<>();
 
@@ -67,36 +59,31 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 
 	private T defaultEndpointInstance;
 
-
 	/**
-	 * Returns the cached implementation of the {@link AmazonWebServiceClient} based on the URL provided.
-	 * the client instance is acquired using the abstract <i>getClientImplementation</i> method.
-	 * The instance is added to the client map with the endpoint string as the key and the
-	 * {@link AmazonWebServiceClient} as the value.
-	 *
+	 * Returns the cached implementation of the {@link AmazonWebServiceClient} based on the URL provided. the client instance is acquired using the abstract
+	 * <i>getClientImplementation</i> method. The instance is added to the client map with the endpoint string as the key and the {@link AmazonWebServiceClient} as the value.
 	 * @param url the URL for which the client is requested.
 	 * @return the implementation of the {@link AmazonWebServiceClient} to be used for the provided url
 	 */
 	public final T getClient(String url) {
 		String endpoint = getEndpointFromURL(url);
-		if(endpoint == null) {
-			if(defaultEndpointInstance == null) {
+		if (endpoint == null) {
+			if (defaultEndpointInstance == null) {
 				defaultEndpointInstance = getClientImplementation();
 			}
 			return defaultEndpointInstance;
 		}
-		if(!clientMap.containsKey(endpoint)) {
+		if (!clientMap.containsKey(endpoint)) {
 			T client = getClientImplementation();
 			client.setEndpoint(endpoint);
 			T existingClient = clientMap.putIfAbsent(endpoint, client);
-			if(existingClient != null) {
+			if (existingClient != null) {
 				//in rare scenarios where a new implementation was created after
 				//checking for the existence of the endpoint in the  client map
 				client = existingClient;
 			}
 			return client;
-		}
-		else {
+		} else {
 			return clientMap.get(endpoint);
 		}
 	}
@@ -118,16 +105,15 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 
 	/**
 	 * Extracts the endpoint from the URL provided
-	 *
 	 * @return Will return null if the provided url is empty
 	 */
 	private String getEndpointFromURL(String stringUrl) {
-		if(!StringUtils.hasText(stringUrl)) {
+		if (!StringUtils.hasText(stringUrl)) {
 			return null;
 		}
 		String endpoint;
 		try {
-			if(!(stringUrl.startsWith(HTTP)
+			if (!(stringUrl.startsWith(HTTP)
 					|| stringUrl.startsWith(HTTPS)
 					|| stringUrl.startsWith(SMTP))) {
 				stringUrl = DEFAULT_PROTOCOL + stringUrl;
@@ -135,14 +121,13 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 			URL url = new URL(stringUrl);
 			String host = url.getHost();
 			String protocol = url.getProtocol();
-			if(StringUtils.hasText(protocol)) {
+			if (StringUtils.hasText(protocol)) {
 				endpoint = protocol + "://" + host;
-			}
-			else {
+			} else {
 				endpoint = host;
 			}
 		} catch (MalformedURLException e) {
-			throw new AWSOperationException(null, "The URL \"" + stringUrl + "\" is malformed",e);
+			throw new AWSOperationException(null, "The URL \"" + stringUrl + "\" is malformed", e);
 		}
 		return endpoint;
 	}
@@ -151,6 +136,4 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 	 * The subclass needs to implement this method and return an appropriate implementation
 	 */
 	protected abstract T getClientImplementation();
-
-
 }

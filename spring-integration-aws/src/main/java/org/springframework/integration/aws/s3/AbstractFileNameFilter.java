@@ -15,21 +15,13 @@
  */
 package org.springframework.integration.aws.s3;
 
-
 import org.springframework.util.StringUtils;
 
 /**
- * The abstract file name filter that first filters out the file if it is
- * not eligible for filtering based on the name.
- * For e.g, if a particular folder on S3 is to be synchronized with the
- * local file system, then the name of the key is initially accepted
- * only if it corresponds to an object under that folder or sub folder on S3.
- * All other keys are ignored
- *
+ * The abstract file name filter that first filters out the file if it is not eligible for filtering based on the name. For e.g, if a particular folder on S3 is to be synchronized
+ * with the local file system, then the name of the key is initially accepted only if it corresponds to an object under that folder or sub folder on S3. All other keys are ignored
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public abstract class AbstractFileNameFilter implements FileNameFilter {
 
@@ -41,40 +33,34 @@ public abstract class AbstractFileNameFilter implements FileNameFilter {
 	 * @see org.springframework.integration.aws.s3.FileNameFilter#accept(java.lang.String)
 	 */
 	public boolean accept(String fileName) {
-		if(!StringUtils.hasText(fileName))
+		if (!StringUtils.hasText(fileName))
 			return false;
 
-		if(StringUtils.hasText(folderName)) {
-			if(fileName.startsWith(folderName)) {
+		if (StringUtils.hasText(folderName)) {
+			if (fileName.startsWith(folderName)) {
 				//This file is in the folder or in a child folder or the given folder
 				String relativePath = fileName.substring(folderName.length());
-				if(relativePath.length() == 0 || (!acceptSubFolders && relativePath.indexOf("/") != -1)) {
+				if (relativePath.length() == 0 || (!acceptSubFolders && relativePath.indexOf("/") != -1)) {
 					return false;
 				}
-			}
-			else {
+			} else {
 				return false;
 			}
-		}
-		else {
+		} else {
 			//Its the folder entry within the bucket
-			if(!acceptSubFolders && fileName.indexOf("/") != -1) {
+			if (!acceptSubFolders && fileName.indexOf("/") != -1) {
 				return false;
 			}
 		}
-		if(fileName.contains("/")) {
+		if (fileName.contains("/")) {
 			return isFileNameAccepted(fileName.substring(fileName.lastIndexOf("/") + 1));
-		}
-		else {
+		} else {
 			return isFileNameAccepted(fileName);
 		}
-
 	}
 
-
 	/**
-	 * Gets the folder whose file are to be accepted, this path is relative to the
-	 * bucket.
+	 * Gets the folder whose file are to be accepted, this path is relative to the bucket.
 	 */
 	public String getFolderName() {
 		return folderName;
@@ -82,53 +68,43 @@ public abstract class AbstractFileNameFilter implements FileNameFilter {
 
 	/**
 	 * Sets the base folder name under which which the files will be accepted.
-	 *
 	 * @param folderName
 	 */
 	public void setFolderName(String folderName) {
 
-		if(StringUtils.hasText(folderName)) {
+		if (StringUtils.hasText(folderName)) {
 			String trimmedFolderName = folderName.trim();
-			if("/".equals(trimmedFolderName)) {
+			if ("/".equals(trimmedFolderName)) {
 				trimmedFolderName = null;
-			}
-			else {
-				if(!trimmedFolderName.endsWith("/")) {
+			} else {
+				if (!trimmedFolderName.endsWith("/")) {
 					trimmedFolderName = trimmedFolderName + "/";
 				}
 
-				if(trimmedFolderName.startsWith("/")) {
+				if (trimmedFolderName.startsWith("/")) {
 					trimmedFolderName = trimmedFolderName.substring(1);
 				}
 			}
 			this.folderName = trimmedFolderName;
-		}
-		else {
+		} else {
 			this.folderName = null;
 		}
-
 	}
 
 	/**
 	 * Checks the flag if the sub folders are to be accepted or not.
-	 *
 	 */
 	public boolean isAcceptSubFolders() {
 		return acceptSubFolders;
 	}
 
-
 	/**
-	 * Sets if the sub folders of the folder set in {@link #folderName}
-	 * are to be accepted or not.
-	 *
+	 * Sets if the sub folders of the folder set in {@link #folderName} are to be accepted or not.
 	 * @param acceptSubFolders
 	 */
 	public void setAcceptSubFolders(boolean acceptSubFolders) {
 		this.acceptSubFolders = acceptSubFolders;
 	}
 
-
 	public abstract boolean isFileNameAccepted(String fileName);
-
 }

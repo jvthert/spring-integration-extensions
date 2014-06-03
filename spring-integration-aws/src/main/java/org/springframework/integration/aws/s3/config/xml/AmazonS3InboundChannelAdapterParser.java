@@ -37,16 +37,27 @@ import static org.springframework.integration.aws.config.xml.AmazonWSParserUtils
 public class AmazonS3InboundChannelAdapterParser extends AbstractPollingInboundChannelAdapterParser {
 
 	private static final String S3_BUCKET = "bucket";
+
 	private static final String TEMPORARY_SUFFIX = "temporary-suffix";
+
 	private static final String S3_OPERATIONS = "s3-operations";
+
 	private static final String AWS_ENDPOINT = "aws-endpoint";
+
 	private static final String REMOTE_DIRECTORY = "remote-directory";
+
 	private static final String LOCAL_DIRECTORY = "local-directory";
+
 	private static final String LOCAL_DIRECTORY_EXPRESSION = "local-directory-expression";
+
 	private static final String AWS_CREDENTIAL = "credentials";
+
 	private static final String MAX_OBJECTS_PER_BATCH = "max-objects-per-batch";
- 	private static final String FILE_NAME_WILDCARD = "file-name-wildcard";
+
+	private static final String FILE_NAME_WILDCARD = "file-name-wildcard";
+
 	private static final String FILE_NAME_REGEX = "file-name-regex";
+
 	private static final String ACCEPT_SUB_FOLDERS = "accept-sub-folders";
 
 	@Override

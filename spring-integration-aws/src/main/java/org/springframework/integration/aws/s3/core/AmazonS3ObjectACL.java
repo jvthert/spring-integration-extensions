@@ -17,17 +17,12 @@ package org.springframework.integration.aws.s3.core;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.springframework.util.Assert;
 
 /**
- * The object containing the Amazon S3 Object's ACL. Access is used to control the access to
- * the resource in S3 bucket
- *
+ * The object containing the Amazon S3 Object's ACL. Access is used to control the access to the resource in S3 bucket
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AmazonS3ObjectACL {
 
@@ -42,7 +37,6 @@ public class AmazonS3ObjectACL {
 
 	/**
 	 * Sets the provided grants on the S3 object
-	 *
 	 * @param grants
 	 */
 	public void setGrants(Set<ObjectGrant> grants) {
@@ -52,11 +46,10 @@ public class AmazonS3ObjectACL {
 
 	/**
 	 * A convenience method that will be used to add grants to the objects.
-	 *
 	 * @param grant
 	 */
 	public void addGrant(ObjectGrant grant) {
-		Assert.notNull(grant,"Provide non null object grant");
+		Assert.notNull(grant, "Provide non null object grant");
 		grants.add(grant);
 	}
 }

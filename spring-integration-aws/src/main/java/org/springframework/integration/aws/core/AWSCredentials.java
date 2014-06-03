@@ -17,11 +17,8 @@ package org.springframework.integration.aws.core;
 
 /**
  * The common interfaces for all implementations of Amazon WS Credentials
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface AWSCredentials {
 
@@ -34,5 +31,4 @@ public interface AWSCredentials {
 	 * Get the Secret key to the Amazon WS account
 	 */
 	String getSecretKey();
-
 }

@@ -24,24 +24,20 @@ import java.io.UnsupportedEncodingException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The common utility methods for the
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AWSCommonUtils {
 
-	private static final Log logger = LogFactory.getLog(AWSCommonUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(AWSCommonUtils.class);
 
 	/**
 	 * Generates the MD5 hash of the file provided
@@ -53,23 +49,19 @@ public class AWSCommonUtils {
 		final byte[] digestToReturn;
 
 		try {
-			BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file),32768);
+			BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file), 32768);
 			din = new DigestInputStream(bin, MessageDigest.getInstance("MD5"));
 			//Just to update the digest
 			byte[] dummy = new byte[4096];
-			for (int i = 1; i > 0; i = din.read(dummy));
+			for (int i = 1; i > 0; i = din.read(dummy)) ;
 			digestToReturn = din.getMessageDigest().digest();
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Caught Exception while generating a MessageDigest instance", e);
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			throw new IllegalStateException("File " + file.getName() + " not found", e);
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Caught exception while reading from file", e);
-		}
-		finally {
+		} finally {
 			IOUtils.closeQuietly(din);
 		}
 		return digestToReturn;
@@ -98,7 +90,6 @@ public class AWSCommonUtils {
 
 	/**
 	 * Decodes the given base 64 raw bytes
-	 *
 	 * @param rawBytes
 	 */
 	public static byte[] decodeBase64(byte[] rawBytes) throws UnsupportedEncodingException {

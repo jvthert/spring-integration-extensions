@@ -26,33 +26,30 @@ import org.w3c.dom.Element;
 
 /**
  * The utility class for the namespace parsers
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public final class AmazonWSParserUtils {
 
 	public static final String ACCESS_KEY = "accessKey";
+
 	public static final String SECRET_KEY = "secretKey";
+
 	public static final String PROPERTIES_FILE = "propertiesFile";
+
 	public static final String CREDENTIALS_REF = "credentials-ref";
 
 	private AmazonWSParserUtils() {
 		throw new AssertionError("Cannot instantiate the utility class");
 	}
 
-
 	/**
-	 * Registers the {@link AWSCredentials} bean with the current ApplicationContext if
-	 * accessKey and secretKey is given, if the credentials-ref is given, the given value
-	 * is returned.
-	 *
+	 * Registers the {@link AWSCredentials} bean with the current ApplicationContext if accessKey and secretKey is given, if the credentials-ref is given, the given value is
+	 * returned.
 	 * @param element
 	 * @param parserContext
 	 */
-	public static String getAmazonWSCredentials(Element element,ParserContext parserContext) {
+	public static String getAmazonWSCredentials(Element element, ParserContext parserContext) {
 		//TODO: Some mechanism to use the same instance with same ACCESS_KEY to be implemented
 		String accessKey = element.getAttribute(ACCESS_KEY);
 		String secretKey = element.getAttribute(SECRET_KEY);
@@ -60,36 +57,34 @@ public final class AmazonWSParserUtils {
 		String credentialsRef = element.getAttribute(CREDENTIALS_REF);
 		String awsCredentialsGeneratedName;
 
-		if(StringUtils.hasText(credentialsRef)) {
-			if(StringUtils.hasText(propertiesFile)
+		if (StringUtils.hasText(credentialsRef)) {
+			if (StringUtils.hasText(propertiesFile)
 					|| StringUtils.hasText(accessKey)
 					|| StringUtils.hasText(secretKey)) {
 				parserContext.getReaderContext().error("When " + CREDENTIALS_REF + " is specified, " +
 						"do not specify the " + PROPERTIES_FILE + " attribute or the "
-						+ SECRET_KEY  + " and " + ACCESS_KEY + " attributes", element);
+						+ SECRET_KEY + " and " + ACCESS_KEY + " attributes", element);
 			}
 			awsCredentialsGeneratedName = credentialsRef;
-		}
-		else {
-			if(StringUtils.hasText(propertiesFile)) {
-				if(StringUtils.hasText(accessKey) && StringUtils.hasText(secretKey)) {
+		} else {
+			if (StringUtils.hasText(propertiesFile)) {
+				if (StringUtils.hasText(accessKey) && StringUtils.hasText(secretKey)) {
 					parserContext.getReaderContext().error("When " + ACCESS_KEY + " and " + SECRET_KEY +
 							" are specified, do not specify the " + PROPERTIES_FILE + " attribute", element);
 				}
 
 				BeanDefinitionBuilder builder =
-					BeanDefinitionBuilder.genericBeanDefinition(PropertiesAWSCredentials.class);
+						BeanDefinitionBuilder.genericBeanDefinition(PropertiesAWSCredentials.class);
 				builder.addConstructorArgValue(propertiesFile);
 				awsCredentialsGeneratedName = BeanDefinitionReaderUtils.registerWithGeneratedName(
 						builder.getBeanDefinition(), parserContext.getRegistry());
 			} else {
 				BeanDefinitionBuilder builder
-				= BeanDefinitionBuilder.genericBeanDefinition(BasicAWSCredentials.class);
+						= BeanDefinitionBuilder.genericBeanDefinition(BasicAWSCredentials.class);
 				builder.addConstructorArgValue(accessKey);
 				builder.addConstructorArgValue(secretKey);
 				awsCredentialsGeneratedName = BeanDefinitionReaderUtils.registerWithGeneratedName(
 						builder.getBeanDefinition(), parserContext.getRegistry());
-
 			}
 		}
 

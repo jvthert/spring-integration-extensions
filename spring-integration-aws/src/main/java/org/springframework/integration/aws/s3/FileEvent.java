@@ -17,14 +17,10 @@ package org.springframework.integration.aws.s3;
 
 import java.io.File;
 
-
 /**
  * The interface denoting the file event type and the {@link File} on which the event occurred
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface FileEvent {
 

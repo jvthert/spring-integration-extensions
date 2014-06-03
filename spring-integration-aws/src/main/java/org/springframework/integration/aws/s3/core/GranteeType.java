@@ -16,13 +16,9 @@
 package org.springframework.integration.aws.s3.core;
 
 /**
- * Identifies the type of the grantee. E.g. A grantee can be identified using the  canonical
- * identifier or the email id.
- *
+ * Identifies the type of the grantee. E.g. A grantee can be identified using the  canonical identifier or the email id.
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public enum GranteeType {
 
@@ -32,9 +28,8 @@ public enum GranteeType {
 	CANONICAL_GRANTEE_TYPE,
 
 	/**
-	 * This email is usually resolved to the canonical id of the user.
-	 * This would fail and an error would be thrown if more than 2 accounts are
-	 * related to the user's email account.
+	 * This email is usually resolved to the canonical id of the user. This would fail and an error would be thrown if more than 2 accounts are related to the user's email
+	 * account.
 	 */
 	EMAIL_GRANTEE_TYPE,
 

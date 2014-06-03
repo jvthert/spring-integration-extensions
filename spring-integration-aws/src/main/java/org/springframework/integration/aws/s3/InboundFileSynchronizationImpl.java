@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.integration.aws.s3.core.AmazonS3Object;
 import org.springframework.integration.aws.s3.core.AmazonS3Operations;
@@ -35,16 +35,14 @@ import org.springframework.util.StringUtils;
 import static org.springframework.integration.aws.core.AWSCommonUtils.*;
 
 /**
- * The implementation for {@link InboundFileSynchronizer}, this implementation will use
- * the {@link AmazonS3Operations} to list the objects in the remote bucket on invocation of
- * the {@link #synchronizeToLocalDirectory(File, String, String)}. The listed objects will then
- * be checked against the
+ * The implementation for {@link InboundFileSynchronizer}, this implementation will use the {@link AmazonS3Operations} to list the objects in the remote bucket on invocation of the
+ * {@link #synchronizeToLocalDirectory(File, String, String)}. The listed objects will then be checked against the
  * @author Amol Nayak
  * @since 0.5
  */
 public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, InitializingBean {
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final static Logger logger = LoggerFactory.getLogger(InboundFileSynchronizationImpl.class);
 
 	public static final String CONTENT_MD5 = "Content-MD5";
 
@@ -100,16 +98,12 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 
 	public void synchronizeToLocalDirectory(File localDirectory, String bucketName, String remoteFolder) {
 		if (!lock.tryLock()) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Sync already in progess");
-			}
+			logger.info("Sync already in progess");
 			//Prevent concurrent synchronization requests
 			return;
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Starting sync with local directory");
-		}
+		logger.info("Starting sync with local directory");
 		//Below sync can take long, above lock ensures only one thread is synchronizing
 		try {
 			if (remoteFolder != null && "/".equals(remoteFolder)) {
@@ -143,9 +137,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 			} while (nextMarker != null);
 		} finally {
 			lock.unlock();
-			if (logger.isInfoEnabled()) {
-				logger.info("Sync completed");
-			}
+			logger.info("Sync completed");
 		}
 	}
 
@@ -182,7 +174,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 				//create the directory structure
 				baseDirectory = new File(filePath);
 				if (baseDirectory.mkdirs()) {
-					logger.info("Created new folder: " + baseDirectory);
+					logger.info("Created new folder: {}", baseDirectory);
 				}
 			} else {
 				baseDirectory = localDirectory;
@@ -197,15 +189,13 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 			try {
 				fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
 			} catch (IOException e) {
-				logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
+				logger.error("Caught Exception while writing to file {}", file.getAbsolutePath());
 				//continue with next file.
 			}
 		} else {
 			//Synchronize a file that exists
 			if (!file.isFile()) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("The file " + file.getAbsolutePath() + " is not a regular file, probably a directory, ");
-				}
+				logger.warn("The file {} is not a regular file, probably a directory.", file.getAbsolutePath());
 				return;
 			}
 			String eTag = summary.getETag();
@@ -215,7 +205,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 				try {
 					md5Hex = encodeHex(getContentsMD5AsBytes(file));
 				} catch (UnsupportedEncodingException e) {
-					logger.error("Exception encountered while generating the MD5 hash for the file " + file.getAbsolutePath(), e);
+					logger.error("Exception encountered while generating the MD5 hash for the file {}", file.getAbsolutePath(), e);
 				}
 				if (!eTag.equals(md5Hex)) {
 					//The local file is different than the one on S3, could be latest but we will still
@@ -223,7 +213,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 					try {
 						fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
 					} catch (IOException e) {
-						logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
+						logger.error("Caught Exception while writing to file {}", file.getAbsolutePath());
 					}
 				}
 			} else {
@@ -236,7 +226,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 					try {
 						md5Hex = encodeHex(getContentsMD5AsBytes(file));
 					} catch (UnsupportedEncodingException e) {
-						logger.error("Exception encountered while generating the MD5 hash for the file " + file.getAbsolutePath(), e);
+						logger.error("Exception encountered while generating the MD5 hash for the file {}", file.getAbsolutePath(), e);
 					}
 					try {
 						String remoteHexMD5 = encodeHex(decodeBase64(b64MD5.getBytes("UTF-8")));
@@ -246,7 +236,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 							try {
 								fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
 							} catch (IOException e) {
-								logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
+								logger.error("Caught Exception while writing to file {}", file.getAbsolutePath());
 							}
 						}
 					} catch (UnsupportedEncodingException e) {
@@ -257,7 +247,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 					try {
 						fileOperations.writeToFile(baseDirectory, fileName, s3Object.getInputStream());
 					} catch (IOException e) {
-						logger.error("Caught Exception while writing to file " + file.getAbsolutePath());
+						logger.error("Caught Exception while writing to file {}", file.getAbsolutePath());
 					}
 				}
 			}
@@ -273,10 +263,8 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 	}
 
 	/**
-	 * Checks if the given eTag is a MD5 hash as hex, the hash is 128 bit and hence
-	 * has to be 32 characters in length, also it should contain only hex characters
-	 * In case of multi uploads, it is observed that the eTag contains a "-",
-	 * and hence this method will return false.
+	 * Checks if the given eTag is a MD5 hash as hex, the hash is 128 bit and hence has to be 32 characters in length, also it should contain only hex characters In case of multi
+	 * uploads, it is observed that the eTag contains a "-", and hence this method will return false.
 	 * @param eTag
 	 */
 	private boolean isEtagMD5Hash(String eTag) {

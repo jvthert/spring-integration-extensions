@@ -20,13 +20,9 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.springframework.util.Assert;
 
 /**
- * Filters out the files by matching the given File name against the given regex
- * Uses Apache Commons IO {@link RegexFileFilter} internally
- *
+ * Filters out the files by matching the given File name against the given regex Uses Apache Commons IO {@link RegexFileFilter} internally
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class RegexFileNameFilter extends AbstractFileNameFilter {
 	private final IOFileFilter filter;
@@ -49,5 +45,4 @@ public class RegexFileNameFilter extends AbstractFileNameFilter {
 	public boolean isFileNameAccepted(String fileName) {
 		return filter.accept(null, fileName);
 	}
-
 }

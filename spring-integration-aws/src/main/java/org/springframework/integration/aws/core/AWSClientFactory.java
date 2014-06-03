@@ -18,20 +18,14 @@ package org.springframework.integration.aws.core;
 import com.amazonaws.AmazonWebServiceClient;
 
 /**
- * The factory interface that would be used to get the implementation of the appropriate
- * instance of {@link AmazonWebServiceClient}
- *
+ * The factory interface that would be used to get the implementation of the appropriate instance of {@link AmazonWebServiceClient}
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface AWSClientFactory<T extends AmazonWebServiceClient> {
 
 	/**
-	 * Returns the instance of the {@link AmazonWebServiceClient} with the apropriate endpoint value
-	 * set based on the provided url value
-	 *
+	 * Returns the instance of the {@link AmazonWebServiceClient} with the apropriate endpoint value set based on the provided url value
 	 * @param url The url of the service
 	 * @return The appropriate {@link AmazonWebServiceClient} for the provided endpoint URL
 	 */

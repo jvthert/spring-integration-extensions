@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
 import org.springframework.integration.aws.core.AWSCredentials;
 import org.springframework.integration.aws.s3.core.AmazonS3Object;
@@ -38,6 +40,8 @@ import static org.springframework.integration.aws.s3.AmazonS3MessageHeaders.*;
  * @since 0.5
  */
 public class AmazonS3MessageHandler extends AbstractMessageHandler {
+
+	private final static Logger logger = LoggerFactory.getLogger(AmazonS3MessageHandler.class);
 
 	private final AWSCredentials credentials;
 
@@ -59,8 +63,7 @@ public class AmazonS3MessageHandler extends AbstractMessageHandler {
 	}
 
 	/**
-	 * The constructor that initializes {@link AmazonS3MessageHandler} with the provided
-	 * implementation of {@link AmazonS3Operations} and using the provided {@link AWSCredentials}
+	 * The constructor that initializes {@link AmazonS3MessageHandler} with the provided implementation of {@link AmazonS3Operations} and using the provided {@link AWSCredentials}
 	 * @param credentials
 	 * @param operations
 	 */
@@ -72,11 +75,9 @@ public class AmazonS3MessageHandler extends AbstractMessageHandler {
 	}
 
 	/**
-	 * The handler implementation for the Amazon S3 used to put objects in the remote AWS S3 bucket
-	 * the message should contain a valid payload of type {@link File}, {@link InputStream},
-	 * byte[] or {@link String}. Various predetermined headers as defined in {@link AmazonS3MessageHeaders}
-	 * are extracted from the message and an {@link AmazonS3Object} is constructed that is provided to
-	 * the {@link AmazonS3Operations} implementation to be uploaded in S3.
+	 * The handler implementation for the Amazon S3 used to put objects in the remote AWS S3 bucket the message should contain a valid payload of type {@link File}, {@link
+	 * InputStream}, byte[] or {@link String}. Various predetermined headers as defined in {@link AmazonS3MessageHeaders} are extracted from the message and an {@link
+	 * AmazonS3Object} is constructed that is provided to the {@link AmazonS3Operations} implementation to be uploaded in S3.
 	 * @param message
 	 */
 	@Override
@@ -128,9 +129,7 @@ public class AmazonS3MessageHandler extends AbstractMessageHandler {
 
 		AmazonS3Object object = builder.build();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Uploading Object to bucket " + bucket + ", to folder " + folder + ", with object name " + objectName);
-		}
+		logger.debug("Uploading Object to bucket {}, to folder {}, with object name {}", bucket, folder, objectName);
 
 		operations.putObject(bucket, folder, objectName, object);
 	}
@@ -152,7 +151,7 @@ public class AmazonS3MessageHandler extends AbstractMessageHandler {
 		if (expectedType.isAssignableFrom(genericHeader.getClass())) {
 			header = (T) genericHeader;
 		} else {
-			logger.warn("Found header " + USER_METADATA + " in the message but was not of required type");
+			logger.warn("Found header {} in the message but was not of required type", USER_METADATA);
 		}
 		return header;
 	}

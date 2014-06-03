@@ -16,60 +16,49 @@
 package org.springframework.integration.aws.s3.core;
 
 /**
- * The Core interface for performing various operations on Amazon S3 like listing objects
- * in the bucket, get an object, put an object and remove an object
- *
+ * The Core interface for performing various operations on Amazon S3 like listing objects in the bucket, get an object, put an object and remove an object
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface AmazonS3Operations {
 
 	public static final String CONTENT_MD5_HEADER = "Content-MD5";
 
 	/**
-	 * Lists Objects in the given bucket and given folder. Provide / if you
-	 * wish to list objects at the root of the bucket
-	 *
+	 * Lists Objects in the given bucket and given folder. Provide / if you wish to list objects at the root of the bucket
 	 * @param bucketName
 	 * @param folder
 	 * @param nextMarker
 	 * @param pageSize
 	 * @return the {@link PaginatedObjectsView} of the matching result
 	 */
-	PaginatedObjectsView listObjects(String bucketName,String folder,String nextMarker,int pageSize);
+	PaginatedObjectsView listObjects(String bucketName, String folder, String nextMarker, int pageSize);
 
 	/**
-	 * Put the given {@link AmazonS3Object} in the provided bucket in the folder specified with the name given
-	 * The object if exists, will be overwritten and the folder path hierarchy
-	 * if absent will be created
-	 *
+	 * Put the given {@link AmazonS3Object} in the provided bucket in the folder specified with the name given The object if exists, will be overwritten and the folder path
+	 * hierarchy if absent will be created
 	 * @param bucketName
 	 * @param folder
 	 * @param objectName
 	 * @param s3Object
 	 */
-	void putObject(String bucketName,String folder,String objectName,AmazonS3Object s3Object);
+	void putObject(String bucketName, String folder, String objectName, AmazonS3Object s3Object);
 
 	/**
-	 * Gets the Object from Amazon S3 from the specified bucket,folder and with
-	 * the given objectName
-	 *
+	 * Gets the Object from Amazon S3 from the specified bucket,folder and with the given objectName
 	 * @param bucketName
 	 * @param folder
 	 * @param objectName
 	 * @return The S3 object corresponding to the given details. Null if no object found
 	 */
-	AmazonS3Object getObject(String bucketName,String folder,String objectName);
+	AmazonS3Object getObject(String bucketName, String folder, String objectName);
 
 	/**
-	 * Removes the specified object from the bucket given, folder specified
-	 * and the given object name from S3
+	 * Removes the specified object from the bucket given, folder specified and the given object name from S3
 	 * @param bucketName
 	 * @param folder
 	 * @param objectName
 	 * @return true if the object was successfully removed else false
 	 */
-	boolean removeObject(String bucketName,String folder,String objectName);
+	boolean removeObject(String bucketName, String folder, String objectName);
 }

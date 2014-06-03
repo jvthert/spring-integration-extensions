@@ -16,13 +16,9 @@
 package org.springframework.integration.aws.s3;
 
 /**
- * Callback interface that gets notified upon a file event on local file system which are
- * performed from {@link InboundLocalFileOperations}
- *
+ * Callback interface that gets notified upon a file event on local file system which are performed from {@link InboundLocalFileOperations}
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface FileEventHandler {
 

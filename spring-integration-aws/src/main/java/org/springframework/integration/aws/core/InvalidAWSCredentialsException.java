@@ -17,11 +17,8 @@ package org.springframework.integration.aws.core;
 
 /**
  * Thrown when AWS Credentials provided by the user are incomplete or invalid
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class InvalidAWSCredentialsException extends RuntimeException {
 

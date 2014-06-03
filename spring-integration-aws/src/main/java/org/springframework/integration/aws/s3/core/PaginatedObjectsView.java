@@ -18,13 +18,9 @@ package org.springframework.integration.aws.s3.core;
 import java.util.List;
 
 /**
- * Returns the Paginated view of the objects in Amazon S3 for the queries bucket
- * See {@link AmazonS3Operations} for more details on various operations on S3
- *
+ * Returns the Paginated view of the objects in Amazon S3 for the queries bucket See {@link AmazonS3Operations} for more details on various operations on S3
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface PaginatedObjectsView {
 
@@ -41,10 +37,8 @@ public interface PaginatedObjectsView {
 	boolean hasMoreResults();
 
 	/**
-	 * Contains the marker that can be used to get the next listing of objects from the
-	 * S3. Contains a null value if the listing is complete, the hasMoreResults
-	 * method will return true if this marker contains a non null value.
+	 * Contains the marker that can be used to get the next listing of objects from the S3. Contains a null value if the listing is complete, the hasMoreResults method will return
+	 * true if this marker contains a non null value.
 	 */
 	String getNextMarker();
-
 }

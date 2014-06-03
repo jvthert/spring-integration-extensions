@@ -16,19 +16,14 @@
 package org.springframework.integration.aws.ses.core;
 
 import java.util.Map;
-
 import org.springframework.integration.aws.core.AWSOperationException;
 
 /**
  * This exception will be thrown upon failure in sending a mail from Amazon SES
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AmazonSESMailSendException extends AWSOperationException {
-
 
 	/**
 	 *
@@ -38,55 +33,50 @@ public class AmazonSESMailSendException extends AWSOperationException {
 	private final Map<Object, Exception> failedMessages;
 
 	/**
-	 *
 	 * @param accessKey
 	 * @param message
 	 * @param cause
 	 * @param failedMessages
 	 */
 	public AmazonSESMailSendException(String accessKey, String message,
-			Throwable cause,Map<Object, Exception> failedMessages) {
+									  Throwable cause, Map<Object, Exception> failedMessages) {
 		super(accessKey, message, cause);
 		this.failedMessages = failedMessages;
 	}
 
 	/**
-	 *
 	 * @param accessKey
 	 * @param message
 	 * @param failedMessages
 	 */
 	public AmazonSESMailSendException(String accessKey,
-			String message,Map<Object, Exception> failedMessages) {
+									  String message, Map<Object, Exception> failedMessages) {
 		super(accessKey, message);
 		this.failedMessages = failedMessages;
 	}
 
 	/**
-	 *
 	 * @param accessKey
 	 * @param cause
 	 * @param failedMessages
 	 */
 	public AmazonSESMailSendException(String accessKey,
-			Throwable cause,Map<Object, Exception> failedMessages) {
+									  Throwable cause, Map<Object, Exception> failedMessages) {
 		super(accessKey, cause);
 		this.failedMessages = failedMessages;
 	}
 
 	/**
-	 *
 	 * @param accessKey
 	 * @param failedMessages
 	 */
-	public AmazonSESMailSendException(String accessKey,Map<Object, Exception> failedMessages) {
+	public AmazonSESMailSendException(String accessKey, Map<Object, Exception> failedMessages) {
 		super(accessKey);
 		this.failedMessages = failedMessages;
 	}
 
 	/**
-	 * Gets the map of failed messages where the failed message is the key and the exception
-	 * while sending it is the value
+	 * Gets the map of failed messages where the failed message is the key and the exception while sending it is the value
 	 */
 	public Map<Object, Exception> getFailedMessages() {
 		return failedMessages;

@@ -15,22 +15,18 @@
  */
 package org.springframework.integration.aws.config.xml;
 
-import static org.springframework.integration.aws.config.xml.AmazonWSParserUtils.getAmazonWSCredentials;
-
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.integration.config.xml.AbstractOutboundChannelAdapterParser;
 import org.springframework.messaging.MessageHandler;
 import org.w3c.dom.Element;
+import static org.springframework.integration.aws.config.xml.AmazonWSParserUtils.getAmazonWSCredentials;
 
 /**
  * The common adapter parser for all AWS Outbound channel adapters
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public abstract class AbstractAWSOutboundChannelAdapterParser extends
 		AbstractOutboundChannelAdapterParser {
@@ -40,29 +36,26 @@ public abstract class AbstractAWSOutboundChannelAdapterParser extends
 	 */
 	@Override
 	protected final AbstractBeanDefinition parseConsumer(Element element,
-			ParserContext parserContext) {
-		String awsCredentialsGeneratedName = getAmazonWSCredentials(element,parserContext);
+														 ParserContext parserContext) {
+		String awsCredentialsGeneratedName = getAmazonWSCredentials(element, parserContext);
 
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(getMessageHandlerImplementation());
 		builder.addConstructorArgReference(awsCredentialsGeneratedName);
-		processBeanDefinition(builder,awsCredentialsGeneratedName,element,parserContext);
+		processBeanDefinition(builder, awsCredentialsGeneratedName, element, parserContext);
 		return builder.getBeanDefinition();
 	}
 
 	protected abstract Class<? extends MessageHandler> getMessageHandlerImplementation();
 
 	/**
-	 * The subclasses can override this method to set additional attributes and perform some
-	 * additional operations on the {@link BeanDefinitionBuilder}
-	 *
+	 * The subclasses can override this method to set additional attributes and perform some additional operations on the {@link BeanDefinitionBuilder}
 	 * @param builder
 	 * @param awsCredentialsGeneratedName
 	 * @param element
 	 * @param context
 	 */
-	protected void processBeanDefinition(BeanDefinitionBuilder builder,String awsCredentialsGeneratedName,
-				Element element,ParserContext context) {
+	protected void processBeanDefinition(BeanDefinitionBuilder builder, String awsCredentialsGeneratedName,
+										 Element element, ParserContext context) {
 		//Default implementation does nothing
 	}
-
 }

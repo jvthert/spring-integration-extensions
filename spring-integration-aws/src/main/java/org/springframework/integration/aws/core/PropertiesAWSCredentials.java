@@ -17,7 +17,6 @@ package org.springframework.integration.aws.core;
 
 import java.io.IOException;
 import java.util.Properties;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -28,25 +27,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * Load the AWS credentials from the .properties file
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class PropertiesAWSCredentials extends BasicAWSCredentials implements InitializingBean {
 
-
 	public static final String DEFAULT_AWS_ACCESS_KEY_PROPERTY = "accessKey";
+
 	public static final String DEFAULT_AWS_SECRET_KEY_PROPERTY = "secretKey";
 
 	private String accessKeyProperty = DEFAULT_AWS_ACCESS_KEY_PROPERTY;
+
 	private String secretKeyProperty = DEFAULT_AWS_SECRET_KEY_PROPERTY;
+
 	private String propertyFileName;
 
-	/**.
-	 * Constructor accepting the properties file.
-	 *
+	/**
+	 * . Constructor accepting the properties file.
 	 * @param propertyFileName Must not be null or empty
 	 */
 	public PropertiesAWSCredentials(String propertyFileName) {
@@ -55,48 +52,45 @@ public class PropertiesAWSCredentials extends BasicAWSCredentials implements Ini
 		this.propertyFileName = propertyFileName;
 	}
 
-	/**.
-	 * Gets the property name which holds the AWS access key
+	/**
+	 * . Gets the property name which holds the AWS access key
 	 * @return the Access Key Property
 	 */
 	public String getAccessKeyProperty() {
 		return accessKeyProperty;
 	}
 
-	/**.
-	 * Sets the name of the property that will be used as the key in the properties
-	 * file to hold the AWS access key
+	/**
+	 * . Sets the name of the property that will be used as the key in the properties file to hold the AWS access key
 	 * @param accessKeyProperty
 	 */
 	public void setAccessKeyProperty(String accessKeyProperty) {
 		this.accessKeyProperty = accessKeyProperty;
 	}
 
-	/**.
-	 * Gets the property name which holds the
+	/**
+	 * . Gets the property name which holds the
 	 */
 	public String getSecretKeyProperty() {
 		return secretKeyProperty;
 	}
 
-	/**.
-	 * Sets the name of the property that will be used as the key in the properties
-	 * file to hold the AWS secret key
+	/**
+	 * . Sets the name of the property that will be used as the key in the properties file to hold the AWS secret key
 	 */
 	public void setSecretKeyProperty(String secretKeyProperty) {
 		this.secretKeyProperty = secretKeyProperty;
 	}
 
-	/**.
-	 * Get the name of the property file that will hold the AWS credentials
+	/**
+	 * . Get the name of the property file that will hold the AWS credentials
 	 */
 	public String getPropertyFileName() {
 		return propertyFileName;
 	}
 
-	/**.
-	 * Sets the name of the file that will hold the AW credentials.
-	 *
+	/**
+	 * . Sets the name of the file that will hold the AW credentials.
 	 * @param propertyFileName Must not be null or empty
 	 */
 	public void setPropertyFileName(String propertyFileName) {
@@ -104,34 +98,33 @@ public class PropertiesAWSCredentials extends BasicAWSCredentials implements Ini
 		this.propertyFileName = propertyFileName;
 	}
 
-	/**.
-	 * Load the properties file and the keys
+	/**
+	 * . Load the properties file and the keys
 	 */
 	public void afterPropertiesSet() throws Exception {
 		if (!StringUtils.hasText(propertyFileName))
 			throw new InvalidAWSCredentialsException("Mandatory property propertyFileName expected");
 
-		if(!StringUtils.hasText(accessKeyProperty))
+		if (!StringUtils.hasText(accessKeyProperty))
 			throw new InvalidAWSCredentialsException("accessKeyValue has to be non empty and non null");
 
-		if(!StringUtils.hasText(secretKeyProperty))
+		if (!StringUtils.hasText(secretKeyProperty))
 			throw new InvalidAWSCredentialsException("secretKeyValue has to be non empty and non null");
 
 		loadProperties();
-
 	}
 
-	/**.
-	 * The private method that loads the properties from the .properties file and sets the access keys
+	/**
+	 * . The private method that loads the properties from the .properties file and sets the access keys
 	 */
 	private void loadProperties() {
 		Resource resource;
-		if(propertyFileName.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+		if (propertyFileName.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
 			resource = new ClassPathResource(propertyFileName.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), ClassUtils.getDefaultClassLoader());
 		} else {
 			resource = new ClassPathResource(propertyFileName, ClassUtils.getDefaultClassLoader());
 		}
-		if(!resource.exists())
+		if (!resource.exists())
 			throw new InvalidAWSCredentialsException("Unable to find resource \"" + propertyFileName + "\" in classpath");
 
 		Properties props = new Properties();
@@ -141,9 +134,7 @@ public class PropertiesAWSCredentials extends BasicAWSCredentials implements Ini
 			throw new InvalidAWSCredentialsException("Unable to load properties from  \"" + propertyFileName + "\" in classpath");
 		}
 
-		setAccessKey((String)props.get(accessKeyProperty));
-		setSecretKey((String)props.get(secretKeyProperty));
-
-
+		setAccessKey((String) props.get(accessKeyProperty));
+		setSecretKey((String) props.get(secretKeyProperty));
 	}
 }

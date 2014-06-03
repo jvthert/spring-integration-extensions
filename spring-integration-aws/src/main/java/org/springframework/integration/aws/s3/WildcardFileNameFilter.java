@@ -21,13 +21,9 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.springframework.util.Assert;
 
 /**
- * Performs wildcard filename filtering based on the wildcard String passed.
- * Used Apache Commons IO {@link WildcardFileFilter} to perform the filtering
- *
+ * Performs wildcard filename filtering based on the wildcard String passed. Used Apache Commons IO {@link WildcardFileFilter} to perform the filtering
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class WildcardFileNameFilter extends AbstractFileNameFilter {
 
@@ -35,12 +31,11 @@ public class WildcardFileNameFilter extends AbstractFileNameFilter {
 
 	/**
 	 * Default construtor accepting the wildcard string
-	 *
 	 * @param wildcardString
 	 */
 	public WildcardFileNameFilter(String wildcardString) {
 		Assert.hasText(wildcardString, "Wildcard string should be non null, non empty String");
-		filter = new WildcardFileFilter(wildcardString,IOCase.INSENSITIVE);
+		filter = new WildcardFileFilter(wildcardString, IOCase.INSENSITIVE);
 		//Our checks will be case insensitive
 	}
 

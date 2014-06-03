@@ -17,12 +17,9 @@ package org.springframework.integration.aws.s3;
 
 /**
  * The enum for various file operations
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public enum FileOperationType {
-	CREATE,UPDATE,RENAME,DELETE
+	CREATE, UPDATE, RENAME, DELETE
 }

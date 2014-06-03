@@ -19,11 +19,8 @@ import java.util.Date;
 
 /**
  * The summary of the Object stored on Amazon S3.
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface S3ObjectSummary {
 

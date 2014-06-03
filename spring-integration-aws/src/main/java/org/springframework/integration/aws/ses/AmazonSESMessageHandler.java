@@ -21,19 +21,14 @@ import org.springframework.integration.mail.MailSendingMessageHandler;
 import org.springframework.mail.javamail.JavaMailSender;
 
 /**
- * The Message handler for the SES Mail. This will be used to send email
- * using Amazon SES
- *
+ * The Message handler for the SES Mail. This will be used to send email using Amazon SES
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AmazonSESMessageHandler extends MailSendingMessageHandler {
 
 	/**
-	 * The Default constructor that extends from the {@link MailSendingMessageHandler} and passes
-	 * it an instance of {@link DefaultAmazonSESMailSender}
+	 * The Default constructor that extends from the {@link MailSendingMessageHandler} and passes it an instance of {@link DefaultAmazonSESMailSender}
 	 * @param credentials
 	 */
 	public AmazonSESMessageHandler(AWSCredentials credentials) {
@@ -41,8 +36,7 @@ public class AmazonSESMessageHandler extends MailSendingMessageHandler {
 	}
 
 	/**
-	 * The constructor that accepts the {@link JavaMailSender} instance, used for
-	 * unit tests only
+	 * The constructor that accepts the {@link JavaMailSender} instance, used for unit tests only
 	 * @param mailSender
 	 */
 	AmazonSESMessageHandler(JavaMailSender mailSender) {

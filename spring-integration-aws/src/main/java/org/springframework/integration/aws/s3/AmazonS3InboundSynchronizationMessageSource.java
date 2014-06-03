@@ -18,6 +18,8 @@ package org.springframework.integration.aws.s3;
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.Expression;
@@ -40,6 +42,8 @@ import org.springframework.util.StringUtils;
  */
 public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObjectSupport
 		implements MessageSource<File>, FileEventHandler {
+
+	private final static Logger logger = LoggerFactory.getLogger(AmazonS3InboundSynchronizationMessageSource.class);
 
 	private volatile InboundFileSynchronizer synchronizer;
 
@@ -99,7 +103,6 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 		}
 		String directoryPath = directoryExpression.getValue(evalContext, String.class);
 		directory = new File(directoryPath);
-
 
 		// Make sure the directory is created
 		if (directory.mkdirs()) {

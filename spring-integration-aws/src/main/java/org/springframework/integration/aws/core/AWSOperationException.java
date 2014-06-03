@@ -17,11 +17,8 @@ package org.springframework.integration.aws.core;
 
 /**
  * The Base class for all other AWS operation exceptions
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AWSOperationException extends RuntimeException {
 
@@ -37,17 +34,17 @@ public class AWSOperationException extends RuntimeException {
 		this.accessKey = accessKey;
 	}
 
-	public AWSOperationException(String accessKey,String message) {
+	public AWSOperationException(String accessKey, String message) {
 		super(message);
 		this.accessKey = accessKey;
 	}
 
-	public AWSOperationException(String accessKey,String message, Throwable cause) {
+	public AWSOperationException(String accessKey, String message, Throwable cause) {
 		super(message, cause);
 		this.accessKey = accessKey;
 	}
 
-	public AWSOperationException(String accessKey,Throwable cause) {
+	public AWSOperationException(String accessKey, Throwable cause) {
 		super(cause);
 		this.accessKey = accessKey;
 	}
@@ -58,7 +55,4 @@ public class AWSOperationException extends RuntimeException {
 	public String getAccessKey() {
 		return accessKey;
 	}
-
-
-
 }

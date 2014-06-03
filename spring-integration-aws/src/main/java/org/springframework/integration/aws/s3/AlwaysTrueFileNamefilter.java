@@ -17,11 +17,8 @@ package org.springframework.integration.aws.s3;
 
 /**
  * Simple {@link FileNameFilter} implementation that accepts all the names.
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class AlwaysTrueFileNamefilter extends AbstractFileNameFilter {
 
@@ -33,5 +30,4 @@ public class AlwaysTrueFileNamefilter extends AbstractFileNameFilter {
 	public boolean isFileNameAccepted(String fileName) {
 		return true;
 	}
-
 }

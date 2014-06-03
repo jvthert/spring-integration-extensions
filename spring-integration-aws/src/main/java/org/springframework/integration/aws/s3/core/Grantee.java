@@ -17,15 +17,13 @@ package org.springframework.integration.aws.s3.core;
 
 /**
  * Indicates the Grantee who is being given the Access to a particular resource on S3
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class Grantee {
 
 	private String identifier;
+
 	private GranteeType granteeType;
 
 	public Grantee() {
@@ -96,8 +94,4 @@ public class Grantee {
 			return false;
 		return true;
 	}
-
-
-
-
 }

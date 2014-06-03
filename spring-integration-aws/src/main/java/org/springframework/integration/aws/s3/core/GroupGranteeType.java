@@ -17,11 +17,8 @@ package org.springframework.integration.aws.s3.core;
 
 /**
  * Various types of Groups who can be granted permissions on amazon S3 objects
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public enum GroupGranteeType {
 
@@ -30,8 +27,7 @@ public enum GroupGranteeType {
 	 */
 	AllUsers("http://acs.amazonaws.com/groups/global/AllUsers"),
 	/**
-	 * To grant access to all authenticated users of AWS who is logged in using
-	 * their AWS credentials
+	 * To grant access to all authenticated users of AWS who is logged in using their AWS credentials
 	 */
 	AuthenticatedUsers("http://acs.amazonaws.com/groups/global/AuthenticatedUsers");
 

@@ -19,11 +19,8 @@ import org.springframework.messaging.Message;
 
 /**
  * The Common interface used to generate the file name for the file to be uploaded to S3
- *
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public interface FileNameGenerationStrategy {
 

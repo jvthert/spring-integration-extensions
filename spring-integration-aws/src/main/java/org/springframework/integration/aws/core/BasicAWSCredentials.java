@@ -18,37 +18,31 @@ package org.springframework.integration.aws.core;
 import org.springframework.util.Assert;
 
 /**
- * The basic implementation class holding the Access key and the secret
- * key for the AWS account .
- *
+ * The basic implementation class holding the Access key and the secret key for the AWS account .
  * @author Amol Nayak
- *
  * @since 0.5
- *
  */
 public class BasicAWSCredentials implements AWSCredentials {
 
-	/**.
-	 * Hold the Access key for the AWS account
+	/**
+	 * . Hold the Access key for the AWS account
 	 */
 	private String accessKey;
 
-	/**.
-	 * Hold the Secret key for the
+	/**
+	 * . Hold the Secret key for the
 	 */
 	private String secretKey;
 
-
-	/**.
-	 * Default constructor
+	/**
+	 * . Default constructor
 	 */
 	public BasicAWSCredentials() {
 
 	}
 
-	/**.
-	 * The constructor accepting the access and secret key.
-	 *
+	/**
+	 * . The constructor accepting the access and secret key.
 	 * @param accessKey Must not be null or empty
 	 * @param secretKey Must not be null or empty
 	 */
@@ -82,8 +76,8 @@ public class BasicAWSCredentials implements AWSCredentials {
 		return secretKey;
 	}
 
-	/**.
-	 * Set the Secret key to the Amazon WS account
+	/**
+	 * . Set the Secret key to the Amazon WS account
 	 * @param secretKey
 	 */
 	public void setSecretKey(String secretKey) {
