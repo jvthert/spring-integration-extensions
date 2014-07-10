@@ -24,10 +24,12 @@ import org.springframework.expression.common.LiteralExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.integration.aws.s3.AmazonS3InboundSynchronizationMessageSource;
 import org.springframework.integration.config.xml.AbstractPollingInboundChannelAdapterParser;
-import org.springframework.integration.config.xml.IntegrationNamespaceUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.integration.aws.config.xml.AmazonWSParserUtils.getAmazonWSCredentials;
+import static org.springframework.integration.config.xml.IntegrationNamespaceUtils.setReferenceIfAttributeDefined;
+import static org.springframework.integration.config.xml.IntegrationNamespaceUtils.setValueIfAttributeDefined;
 
 /**
  * The channel adapter parser for the S3 inbound parser
@@ -54,6 +56,8 @@ public class AmazonS3InboundChannelAdapterParser extends AbstractPollingInboundC
 
 	private static final String MAX_OBJECTS_PER_BATCH = "max-objects-per-batch";
 
+	private static final String MAX_NUMBER_OF_BATCHES = "max-number-of-batches";
+
 	private static final String FILE_NAME_WILDCARD = "file-name-wildcard";
 
 	private static final String FILE_NAME_REGEX = "file-name-regex";
@@ -63,15 +67,15 @@ public class AmazonS3InboundChannelAdapterParser extends AbstractPollingInboundC
 	@Override
 	protected BeanMetadataElement parseSource(Element element, ParserContext parserContext) {
 
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(AmazonS3InboundSynchronizationMessageSource.class);
+		BeanDefinitionBuilder builder = genericBeanDefinition(AmazonS3InboundSynchronizationMessageSource.class);
 
 		String awsCredentials = getAmazonWSCredentials(element, parserContext);
 		builder.addPropertyReference(AWS_CREDENTIAL, awsCredentials);
-		IntegrationNamespaceUtils.setReferenceIfAttributeDefined(builder, element, S3_OPERATIONS);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, S3_BUCKET);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, TEMPORARY_SUFFIX);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, REMOTE_DIRECTORY);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, AWS_ENDPOINT);
+		setReferenceIfAttributeDefined(builder, element, S3_OPERATIONS);
+		setValueIfAttributeDefined(builder, element, S3_BUCKET);
+		setValueIfAttributeDefined(builder, element, TEMPORARY_SUFFIX);
+		setValueIfAttributeDefined(builder, element, REMOTE_DIRECTORY);
+		setValueIfAttributeDefined(builder, element, AWS_ENDPOINT);
 		String directory = element.getAttribute(LOCAL_DIRECTORY);
 		String directoryExpression = element.getAttribute(LOCAL_DIRECTORY_EXPRESSION);
 		boolean hasDirectory = StringUtils.hasText(directory);
@@ -97,10 +101,11 @@ public class AmazonS3InboundChannelAdapterParser extends AbstractPollingInboundC
 			builder.addPropertyValue("directory", expr);
 		}
 
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, MAX_OBJECTS_PER_BATCH);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, ACCEPT_SUB_FOLDERS);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, FILE_NAME_WILDCARD);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, FILE_NAME_REGEX);
+		setValueIfAttributeDefined(builder, element, MAX_OBJECTS_PER_BATCH);
+		setValueIfAttributeDefined(builder, element, MAX_NUMBER_OF_BATCHES);
+		setValueIfAttributeDefined(builder, element, ACCEPT_SUB_FOLDERS);
+		setValueIfAttributeDefined(builder, element, FILE_NAME_WILDCARD);
+		setValueIfAttributeDefined(builder, element, FILE_NAME_REGEX);
 
 		return builder.getBeanDefinition();
 	}

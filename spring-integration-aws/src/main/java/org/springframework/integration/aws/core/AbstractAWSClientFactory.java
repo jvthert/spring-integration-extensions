@@ -93,7 +93,7 @@ public abstract class AbstractAWSClientFactory<T extends AmazonWebServiceClient>
 	 * @return the copy of the clientMap
 	 */
 	public final Map<String, T> getClientMap() {
-		return new HashMap<String, T>(clientMap);
+		return new HashMap<>(clientMap);
 	}
 
 	/**

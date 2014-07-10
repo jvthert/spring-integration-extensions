@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
 public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObjectSupport
 		implements MessageSource<File>, FileEventHandler {
 
-	private final static Logger logger = LoggerFactory.getLogger(AmazonS3InboundSynchronizationMessageSource.class);
+	private static final Logger logger = LoggerFactory.getLogger(AmazonS3InboundSynchronizationMessageSource.class);
 
 	private volatile InboundFileSynchronizer synchronizer;
 
@@ -85,11 +85,8 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 			//Now check the queue again
 			headElement = filesQueue.poll();
 		}
-		if (headElement != null) {
-			return MessageBuilder.withPayload(headElement).build();
-		} else {
-			return null;
-		}
+
+		return (headElement != null) ? MessageBuilder.withPayload(headElement).build() : null;
 	}
 
 	@Override
@@ -137,9 +134,11 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 
 		InboundFileSynchronizationImpl synchronizationImpl = new InboundFileSynchronizationImpl(s3Operations, fileOperations);
 		synchronizationImpl.setSynchronizingBatchSize(maxObjectsPerBatch);
+
 		if (StringUtils.hasText(fileNameWildcard)) {
 			synchronizationImpl.setFileWildcard(fileNameWildcard);
 		}
+
 		if (StringUtils.hasText(fileNameRegex)) {
 			synchronizationImpl.setFileNamePattern(fileNameRegex);
 		}
@@ -255,7 +254,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 
 	public void onEvent(FileEvent event) {
 		//We are interested in Create new file events only
-		if (FileOperationType.CREATE.equals(event.getFileOperation())) {
+		if (FileOperationType.CREATE == event.getFileOperation()) {
 			try {
 				filesQueue.put(event.getFile());
 				/* The call hierarchy is if, no file found in queue, then receive()

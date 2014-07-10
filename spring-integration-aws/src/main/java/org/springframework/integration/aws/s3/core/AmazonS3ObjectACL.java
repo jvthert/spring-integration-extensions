@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  */
 public class AmazonS3ObjectACL {
 
-	private Set<ObjectGrant> grants = new HashSet<ObjectGrant>();
+	private Set<ObjectGrant> grants = new HashSet<>();
 
 	/**
 	 * Gets all the grants on the object in the bucket

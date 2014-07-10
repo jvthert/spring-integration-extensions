@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
 public class DefaultFileNameGenerationStrategy extends AbstractExpressionEvaluator implements
 		FileNameGenerationStrategy {
 
-	private final static Logger logger = LoggerFactory.getLogger(DefaultFileNameGenerationStrategy.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultFileNameGenerationStrategy.class);
 
 	private volatile String temporarySuffix = ".writing";
 

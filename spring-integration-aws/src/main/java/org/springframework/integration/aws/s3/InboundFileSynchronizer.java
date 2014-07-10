@@ -38,9 +38,20 @@ public interface InboundFileSynchronizer {
 	 * Sets the max number of Files to synchronize at a time. This is the max number of Object information retrieved at a time from S3 and synchronized with the Local file system
 	 * before the next set of information is retrieved from S3. Please note if the file name pattern is set the total number of files from a batch fetched can be anywhere between 0
 	 * to the max number of files fetched per batch
-	 * @param batchSize
+	 *
+	 * @param batchSize the amount of files to fetch per summary request
 	 */
 	void setSynchronizingBatchSize(int batchSize);
+
+	/**
+	 * In order to process large sets of files and yield messages while loading a max batch size
+	 * is introduced. It keeps reading this number of batches and then stops while keeping the point
+	 * where stopped in the adapter. When the queue is empty the synchronization will continue from the
+	 * last saved point.
+	 *
+	 * @param maxNumberOfBatches the amount of pages to sync
+	 */
+	void setMaxNumberOfBatches(int maxNumberOfBatches);
 
 	/**
 	 * Sets the file name regex that will be used to match the key value from S3 to find a match.

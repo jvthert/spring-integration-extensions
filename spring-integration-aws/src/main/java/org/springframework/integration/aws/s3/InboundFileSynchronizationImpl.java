@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.integration.aws.s3.core.AmazonS3Object;
 import org.springframework.integration.aws.s3.core.AmazonS3Operations;
 import org.springframework.integration.aws.s3.core.PaginatedObjectsView;
@@ -40,15 +40,19 @@ import static org.springframework.integration.aws.core.AWSCommonUtils.*;
  * @author Amol Nayak
  * @since 0.5
  */
-public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, InitializingBean {
+public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 
-	private final static Logger logger = LoggerFactory.getLogger(InboundFileSynchronizationImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(InboundFileSynchronizationImpl.class);
 
 	public static final String CONTENT_MD5 = "Content-MD5";
 
+	public static final int MD5_HASH_LENGTH = 32;
+
 	private final AmazonS3Operations client;
 
-	private volatile int maxObjectsPerBatch = 100;        //default
+	private volatile int maxObjectsPerBatch = 10;        //default
+
+	private volatile int maxNumberOfBatches = 2;        //default
 
 	private final InboundLocalFileOperations fileOperations;
 
@@ -62,17 +66,16 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 
 	private volatile boolean acceptSubFolders;
 
-	/**
-	 * @param client
-	 */
-	public InboundFileSynchronizationImpl(AmazonS3Operations client,
-										  InboundLocalFileOperations fileOperations) {
+	private volatile String nextMarker = null;
+
+	public InboundFileSynchronizationImpl(AmazonS3Operations client, InboundLocalFileOperations fileOperations) {
 		Assert.notNull(client, "AmazonS3Client should be non null");
 		Assert.notNull(fileOperations, "fileOperations should be non null");
 		this.client = client;
 		this.fileOperations = fileOperations;
 	}
 
+	@PostConstruct
 	public void afterPropertiesSet() throws Exception {
 		Assert.isTrue(!(StringUtils.hasText(fileWildcard) && StringUtils.hasText(fileNameRegex)),
 				"Only one of the file name wildcard string or file name regex can be specified");
@@ -95,7 +98,6 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 	/* (non-Javadoc)
 	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#synchronizeToLocalDirectory(java.io.File, java.lang.String, java.lang.String)
 	 */
-
 	public void synchronizeToLocalDirectory(File localDirectory, String bucketName, String remoteFolder) {
 		if (!lock.tryLock()) {
 			logger.info("Sync already in progess");
@@ -115,7 +117,14 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 				((AbstractFileNameFilter) filter).setFolderName(remoteFolder);
 			}
 
-			String nextMarker = null;
+			int syncSize = 0;
+
+			if (nextMarker == null) {
+				logger.info("Startinf a fresh sync from S3");
+			} else {
+				logger.info("Continueing a sync from marker: {}", nextMarker);
+			}
+
 			do {
 				PaginatedObjectsView paginatedView = client.listObjects(bucketName, remoteFolder, nextMarker, maxObjectsPerBatch);
 				if (paginatedView == null) {
@@ -124,6 +133,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 
 				nextMarker = paginatedView.getNextMarker();
 				List<S3ObjectSummary> summaries = paginatedView.getObjectSummary();
+				syncSize += summaries.size();
 				for (S3ObjectSummary summary : summaries) {
 					String key = summary.getKey();
 					if (key.endsWith("/") || !filter.accept(key)) {
@@ -134,7 +144,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 					AmazonS3Object s3Object = client.getObject(bucketName, "/", key);
 					synchronizeObjectWithFile(localDirectory, summary, s3Object);
 				}
-			} while (nextMarker != null);
+			} while (nextMarker != null && syncSize < maxNumberOfBatches);
 		} finally {
 			lock.unlock();
 			logger.info("Sync completed");
@@ -143,11 +153,10 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 
 	/**
 	 * Synchronizes the Object with the File on the local file system
-	 * @param localDirectory
-	 * @param summary
+	 * @param localDirectory local directory to sync to
+	 * @param summary s3 overview of objects
 	 */
-	private void synchronizeObjectWithFile(File localDirectory, S3ObjectSummary summary,
-										   AmazonS3Object s3Object) {
+	private void synchronizeObjectWithFile(File localDirectory, S3ObjectSummary summary, AmazonS3Object s3Object) {
 		//Get the complete object data
 
 		String key = summary.getKey();
@@ -256,7 +265,9 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 		/* Finally clean up S3Object in order to release the HTTP connection lease */
 		final InputStream is = s3Object.getInputStream();
 		try {
-			if (is != null) is.close();
+			if (is != null) {
+				is.close();
+			}
 		} catch (IOException e) {
 			logger.info("Unable to close connection");
 		}
@@ -268,23 +279,33 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 	 * @param eTag
 	 */
 	private boolean isEtagMD5Hash(String eTag) {
-		return !(eTag == null || eTag.length() != 32) &&
-				eTag.replaceAll("[a-f0-9A-F]", "").length() == 0;
+		return !(eTag == null || eTag.length() != MD5_HASH_LENGTH) &&
+				eTag.replaceAll("[a-f0-9A-F]", "").isEmpty();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#setSynchronizingBatchSize(int)
 	 */
 
+	@Override
 	public void setSynchronizingBatchSize(int batchSize) {
-		if (batchSize > 0)
+		if (batchSize > 0) {
 			this.maxObjectsPerBatch = batchSize;
+		}
+	}
+
+	@Override
+	public void setMaxNumberOfBatches(final int maxNumberOfBatches) {
+		if (maxNumberOfBatches > 0) {
+			this.maxNumberOfBatches = maxNumberOfBatches;
+		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#setFileNamePattern(java.lang.String)
 	 */
 
+	@Override
 	public void setFileNamePattern(String fileNameRegex) {
 		this.fileNameRegex = fileNameRegex;
 	}
@@ -293,6 +314,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer, 
 	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#setFileWildcard(java.lang.String)
 	 */
 
+	@Override
 	public void setFileWildcard(String fileWildcard) {
 		this.fileWildcard = fileWildcard;
 	}

@@ -23,6 +23,9 @@ import org.springframework.integration.aws.core.BasicAWSCredentials;
 import org.springframework.integration.aws.core.PropertiesAWSCredentials;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerWithGeneratedName;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * The utility class for the namespace parsers
@@ -57,34 +60,31 @@ public final class AmazonWSParserUtils {
 		String credentialsRef = element.getAttribute(CREDENTIALS_REF);
 		String awsCredentialsGeneratedName;
 
-		if (StringUtils.hasText(credentialsRef)) {
-			if (StringUtils.hasText(propertiesFile)
-					|| StringUtils.hasText(accessKey)
-					|| StringUtils.hasText(secretKey)) {
-				parserContext.getReaderContext().error("When " + CREDENTIALS_REF + " is specified, " +
-						"do not specify the " + PROPERTIES_FILE + " attribute or the "
-						+ SECRET_KEY + " and " + ACCESS_KEY + " attributes", element);
+		if (hasText(credentialsRef)) {
+			if (hasText(propertiesFile) || hasText(accessKey) || hasText(secretKey)) {
+				final String message = String.format(
+						"When %s is specified, do not specify the %s attribute or the %s and %s attributes",
+						CREDENTIALS_REF, PROPERTIES_FILE, SECRET_KEY, ACCESS_KEY);
+				parserContext.getReaderContext().error(message, element);
 			}
 			awsCredentialsGeneratedName = credentialsRef;
 		} else {
-			if (StringUtils.hasText(propertiesFile)) {
-				if (StringUtils.hasText(accessKey) && StringUtils.hasText(secretKey)) {
-					parserContext.getReaderContext().error("When " + ACCESS_KEY + " and " + SECRET_KEY +
-							" are specified, do not specify the " + PROPERTIES_FILE + " attribute", element);
+			if (hasText(propertiesFile)) {
+				if (hasText(accessKey) && hasText(secretKey)) {
+					final String message = String.format(
+							"When %s and %s are specified, do not specify the %s attribute",
+							ACCESS_KEY, SECRET_KEY, PROPERTIES_FILE);
+					parserContext.getReaderContext().error(message, element);
 				}
 
-				BeanDefinitionBuilder builder =
-						BeanDefinitionBuilder.genericBeanDefinition(PropertiesAWSCredentials.class);
+				BeanDefinitionBuilder builder = genericBeanDefinition(PropertiesAWSCredentials.class);
 				builder.addConstructorArgValue(propertiesFile);
-				awsCredentialsGeneratedName = BeanDefinitionReaderUtils.registerWithGeneratedName(
-						builder.getBeanDefinition(), parserContext.getRegistry());
+				awsCredentialsGeneratedName = registerWithGeneratedName(builder.getBeanDefinition(), parserContext.getRegistry());
 			} else {
-				BeanDefinitionBuilder builder
-						= BeanDefinitionBuilder.genericBeanDefinition(BasicAWSCredentials.class);
+				BeanDefinitionBuilder builder = genericBeanDefinition(BasicAWSCredentials.class);
 				builder.addConstructorArgValue(accessKey);
 				builder.addConstructorArgValue(secretKey);
-				awsCredentialsGeneratedName = BeanDefinitionReaderUtils.registerWithGeneratedName(
-						builder.getBeanDefinition(), parserContext.getRegistry());
+				awsCredentialsGeneratedName = registerWithGeneratedName(builder.getBeanDefinition(), parserContext.getRegistry());
 			}
 		}
 

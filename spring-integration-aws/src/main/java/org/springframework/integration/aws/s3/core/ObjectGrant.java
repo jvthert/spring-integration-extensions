@@ -32,7 +32,6 @@ public class ObjectGrant {
 	 * @param permission
 	 */
 	public ObjectGrant(Grantee grantee, ObjectPermissions permission) {
-		super();
 		this.grantee = grantee;
 		this.permission = permission;
 	}

@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultAmazonS3Operations extends AbstractAmazonS3Operations {
 
-	private final static Logger logger = LoggerFactory.getLogger(DefaultAmazonS3Operations.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultAmazonS3Operations.class);
 
 	private final AWSCredentials credentials;
 
@@ -133,7 +133,7 @@ public class DefaultAmazonS3Operations extends AbstractAmazonS3Operations {
 		PaginatedObjectsView view = null;
 		List<com.amazonaws.services.s3.model.S3ObjectSummary> summaries = listing.getObjectSummaries();
 		if (summaries != null && !summaries.isEmpty()) {
-			List<S3ObjectSummary> objectSummaries = new ArrayList<S3ObjectSummary>();
+			List<S3ObjectSummary> objectSummaries = new ArrayList<>();
 			for (final com.amazonaws.services.s3.model.S3ObjectSummary summary : summaries) {
 				S3ObjectSummary summ = new S3ObjectSummary() {
 
@@ -159,7 +159,7 @@ public class DefaultAmazonS3Operations extends AbstractAmazonS3Operations {
 				};
 				objectSummaries.add(summ);
 			}
-			view = new PagninatedObjectsViewImpl(objectSummaries, listing.getNextMarker());
+			view = new PaginatedObjectsViewImpl(objectSummaries, listing.getNextMarker());
 		}
 		return view;
 	}
@@ -290,8 +290,9 @@ public class DefaultAmazonS3Operations extends AbstractAmazonS3Operations {
 						permission = Permission.Read;
 					} else if (perm == ObjectPermissions.READ_ACP) {
 						permission = Permission.ReadAcp;
-					} else
+					} else {
 						permission = Permission.WriteAcp;
+					}
 
 					accessControlList.grantPermission(awsGrantee, permission);
 				}

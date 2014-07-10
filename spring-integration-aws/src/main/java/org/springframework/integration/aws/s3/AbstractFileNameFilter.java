@@ -15,7 +15,7 @@
  */
 package org.springframework.integration.aws.s3;
 
-import org.springframework.util.StringUtils;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * The abstract file name filter that first filters out the file if it is not eligible for filtering based on the name. For e.g, if a particular folder on S3 is to be synchronized
@@ -33,14 +33,15 @@ public abstract class AbstractFileNameFilter implements FileNameFilter {
 	 * @see org.springframework.integration.aws.s3.FileNameFilter#accept(java.lang.String)
 	 */
 	public boolean accept(String fileName) {
-		if (!StringUtils.hasText(fileName))
+		if (!hasText(fileName)) {
 			return false;
+		}
 
-		if (StringUtils.hasText(folderName)) {
+		if (hasText(folderName)) {
 			if (fileName.startsWith(folderName)) {
 				//This file is in the folder or in a child folder or the given folder
 				String relativePath = fileName.substring(folderName.length());
-				if (relativePath.length() == 0 || (!acceptSubFolders && relativePath.indexOf("/") != -1)) {
+				if (relativePath.isEmpty() || (!acceptSubFolders && relativePath.contains("/"))) {
 					return false;
 				}
 			} else {
@@ -48,15 +49,14 @@ public abstract class AbstractFileNameFilter implements FileNameFilter {
 			}
 		} else {
 			//Its the folder entry within the bucket
-			if (!acceptSubFolders && fileName.indexOf("/") != -1) {
+			if (!acceptSubFolders && fileName.contains("/")) {
 				return false;
 			}
 		}
-		if (fileName.contains("/")) {
-			return isFileNameAccepted(fileName.substring(fileName.lastIndexOf("/") + 1));
-		} else {
-			return isFileNameAccepted(fileName);
-		}
+
+		return (fileName.contains("/")) ?
+				isFileNameAccepted(fileName.substring(fileName.lastIndexOf("/") + 1)) :
+				isFileNameAccepted(fileName);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public abstract class AbstractFileNameFilter implements FileNameFilter {
 	 */
 	public void setFolderName(String folderName) {
 
-		if (StringUtils.hasText(folderName)) {
+		if (hasText(folderName)) {
 			String trimmedFolderName = folderName.trim();
 			if ("/".equals(trimmedFolderName)) {
 				trimmedFolderName = null;

@@ -41,7 +41,7 @@ import static org.springframework.integration.aws.s3.AmazonS3MessageHeaders.*;
  */
 public class AmazonS3MessageHandler extends AbstractMessageHandler {
 
-	private final static Logger logger = LoggerFactory.getLogger(AmazonS3MessageHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(AmazonS3MessageHandler.class);
 
 	private final AWSCredentials credentials;
 
@@ -180,7 +180,7 @@ public class AmazonS3MessageHandler extends AbstractMessageHandler {
 	 */
 	public void setRemoteDirectoryExpression(Expression expression) {
 		Assert.notNull(expression, "Remote directory expression is null");
-		remoteDirectoryProcessor = new ExpressionEvaluatingMessageProcessor<String>(expression);
+		remoteDirectoryProcessor = new ExpressionEvaluatingMessageProcessor<>(expression);
 	}
 
 	/**

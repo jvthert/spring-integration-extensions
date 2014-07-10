@@ -42,6 +42,10 @@ import static org.springframework.integration.aws.core.AWSCommonUtils.getContent
  */
 public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, InitializingBean {
 
+	public static final int MINIMUM_MULTIPART_UPLOAD_THRESHOLD = 5120;
+
+	public static final int DEFAULT_TEMPFILE_SIZE = 1024;
+
 	protected final Logger logger = LoggerFactory.getLogger(AbstractAmazonS3Operations.class);
 
 	private volatile long multipartUploadThreshold;
@@ -79,7 +83,7 @@ public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, 
 	 * @param multipartUploadThreshold
 	 */
 	public void setMultipartUploadThreshold(long multipartUploadThreshold) {
-		Assert.isTrue(multipartUploadThreshold >= 5120,
+		Assert.isTrue(multipartUploadThreshold >= MINIMUM_MULTIPART_UPLOAD_THRESHOLD,
 				"Minimum threshold for multipart upload is 5120 bytes");
 		this.multipartUploadThreshold = multipartUploadThreshold;
 	}
@@ -193,8 +197,8 @@ public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, 
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(tempFile);
-			byte[] bytes = new byte[1024];
-			int read = 0;
+			byte[] bytes = new byte[DEFAULT_TEMPFILE_SIZE];
+			int read;
 			while (true) {
 				read = inStream.read(bytes);
 				if (read == -1) {
@@ -268,10 +272,10 @@ public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, 
 
 		String stringContentMD5 = null;
 		try {
-			stringContentMD5 =
-					encodeHex(getContentsMD5AsBytes(file));
+			stringContentMD5 = encodeHex(getContentsMD5AsBytes(file));
 		} catch (UnsupportedEncodingException e) {
-			logger.error("Exception while generating the content's MD5 of the file " + file.getAbsolutePath(), e);
+			final String absolutePath = file != null? file.getAbsolutePath() : "'file is null'";
+			logger.error("Exception while generating the content's MD5 of the file {}", absolutePath, e);
 		}
 
 		try {
@@ -285,7 +289,7 @@ public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, 
 					e);
 		}
 
-		if (isTempFile) {
+		if (isTempFile && file != null) {
 			//Delete the temp file
 			logger.debug("Deleting temp file: {}", file.getName());
 			boolean deleteSuccessful = file.delete();
@@ -407,14 +411,13 @@ public abstract class AbstractAmazonS3Operations implements AmazonS3Operations, 
 								  AmazonS3ObjectACL objectACL, Map<String, String> userMetadata, String stringContentMD5);
 }
 
-class PagninatedObjectsViewImpl implements PaginatedObjectsView {
+class PaginatedObjectsViewImpl implements PaginatedObjectsView {
 
 	private final List<S3ObjectSummary> objectSummary;
 
 	private final String nextMarker;
 
-	public PagninatedObjectsViewImpl(List<S3ObjectSummary> objectSummary,
-									 String nextMarker) {
+	public PaginatedObjectsViewImpl(List<S3ObjectSummary> objectSummary, String nextMarker) {
 		this.objectSummary = objectSummary;
 		this.nextMarker = nextMarker;
 	}

@@ -358,6 +358,16 @@
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="max-number-of-batches" type="xsd:integer">
+				<xsd:annotation>
+					<xsd:documentation>
+						The maximum number of batches to read before stopping the sync and allowing the poller to
+						get files off the queue for processing. For large sets of files setting a small batch size
+						and a small maximum of batches speeds up the initial sync. As soon as all messages are consumed
+						the process will continue where it stopped. Default is 2 pages
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="accept-sub-folders" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation>

@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +39,11 @@ import org.springframework.util.StringUtils;
 public class InboundLocalFileOperationsImpl implements
 		InboundLocalFileOperations {
 
-	private final static Logger logger = LoggerFactory.getLogger(InboundLocalFileOperationsImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(InboundLocalFileOperationsImpl.class);
 
-	private final List<FileEventHandler> handlers = new ArrayList<FileEventHandler>();
+	public static final int DEFAULT_TEMPFILE_SIZE = 4096;
+
+	private final List<FileEventHandler> handlers = new ArrayList<>();
 
 	private volatile String tempFileSuffix = ".writing";
 
@@ -82,9 +85,8 @@ public class InboundLocalFileOperationsImpl implements
 		}
 	}
 
-	/**
-	 * Returns true if create directories if required flag is set to true
-	 */
+	/** Returns true if create directories if required flag is set to true */
+	@SuppressWarnings("UnusedDeclaration")
 	public boolean isCreateDirectoriesIfRequired() {
 		return createDirectoriesIfRequired;
 	}
@@ -108,10 +110,8 @@ public class InboundLocalFileOperationsImpl implements
 		Assert.isTrue(!directory.exists() || directory.isDirectory(), "Provided directory is not a directory");
 		Assert.isTrue(createDirectoriesIfRequired || directory.exists(), "Provided directories does not exist and create directory flag is false");
 
-		if (!directory.exists() && createDirectoriesIfRequired) {
-			if (!directory.mkdirs()) {
-				throw new IOException(String.format("Unable to create the directory '%s'", directory.getAbsolutePath()));
-			}
+		if (!directory.exists() && createDirectoriesIfRequired && !directory.mkdirs()) {
+			throw new IOException(String.format("Unable to create the directory '%s'", directory.getAbsolutePath()));
 		}
 
 		if (!(in instanceof ByteArrayInputStream)
@@ -119,7 +119,7 @@ public class InboundLocalFileOperationsImpl implements
 			in = new BufferedInputStream(in);
 		}
 		String tempFileName = fileName + tempFileSuffix;
-		byte[] bytes = new byte[4096];    //4K
+		byte[] bytes = new byte[DEFAULT_TEMPFILE_SIZE];    //4K
 
 		String absoluteDirectoryPath = directory.getAbsolutePath();
 		String filePath;
@@ -130,18 +130,23 @@ public class InboundLocalFileOperationsImpl implements
 		}
 
 		final File fileToWrite = new File(filePath);
-		if (!fileToWrite.exists()) {
-			fileToWrite.createNewFile();
+		if (!fileToWrite.exists() && !fileToWrite.createNewFile()) {
+			throw new RuntimeException("Unable to create file " + fileToWrite.getAbsolutePath());
 		}
-		FileOutputStream fos = new FileOutputStream(fileToWrite);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		for (int read; (read = in.read(bytes)) != -1; ) {
-			bos.write(bytes, 0, read);
+
+		try (FileOutputStream fos = new FileOutputStream(fileToWrite);
+			 BufferedOutputStream bos = new BufferedOutputStream(fos) ) {
+			for (int read; (read = in.read(bytes)) != -1; ) {
+				bos.write(bytes, 0, read);
+			}
+		} catch (FileNotFoundException e) {
+			logger.error("File not found: {}", fileToWrite, e);
+			throw e;
 		}
-		bos.close();
+
 		//Now rename the file
 		final File dest = new File(filePath.substring(0, filePath.indexOf(tempFileSuffix)));
-		//ifDestination file exists, delete it
+		//if destination file exists, delete it
 		final boolean isSuccessful;
 		if (dest.exists()) {
 			boolean isDeleteSuccessful = dest.delete();
@@ -161,22 +166,18 @@ public class InboundLocalFileOperationsImpl implements
 		} else {
 			isSuccessful = renameFile(fileToWrite, dest);
 		}
-		//notify the listeners
+		//Create notification for the listeners
 		if (!handlers.isEmpty()) {
 			FileEvent event = new FileEvent() {
-
 				public FileOperationType getFileOperation() {
 					return FileOperationType.CREATE;
 				}
-
 				public File getFile() {
-					if (isSuccessful) {
-						return dest;
-					} else {
-						return fileToWrite;
-					}
+					return isSuccessful ? dest : fileToWrite;
 				}
 			};
+
+			//Send notification to all listeners
 			for (FileEventHandler handler : handlers) {
 				try {
 					handler.onEvent(event);
@@ -187,9 +188,7 @@ public class InboundLocalFileOperationsImpl implements
 		}
 	}
 
-	/**
-	 * Private helper method that is used to rename the source to destination file
-	 */
+	/** Private helper method that is used to rename the source to destination file */
 	private boolean renameFile(final File from, final File to) {
 		final boolean isSuccessful;
 		final boolean isRenameSuccessful = from.renameTo(to);

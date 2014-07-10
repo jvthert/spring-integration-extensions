@@ -49,11 +49,13 @@ public class AmazonS3Object implements Serializable {
 	 */
 	public AmazonS3Object(Map<String, String> userMetaData,
 						  Map<String, Object> metaData, InputStream inputStream, File fileSource, AmazonS3ObjectACL objectACL) {
-		if (userMetaData != null)
+		if (userMetaData != null) {
 			this.userMetaData = Collections.unmodifiableMap(userMetaData);
+		}
 
-		if (metaData != null)
+		if (metaData != null) {
 			this.metaData = Collections.unmodifiableMap(metaData);
+		}
 
 		Assert.isTrue((inputStream == null) ^ (fileSource == null),
 				"Exactly one of 'inputStream' or 'fileSource' must be provided");

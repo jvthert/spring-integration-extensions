@@ -45,24 +45,22 @@ public class AWSCommonUtils {
 	 */
 	public static byte[] getContentsMD5AsBytes(File file) {
 
-		DigestInputStream din = null;
 		final byte[] digestToReturn;
 
-		try {
-			BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file), 32768);
-			din = new DigestInputStream(bin, MessageDigest.getInstance("MD5"));
+		try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file), 32768);
+			 DigestInputStream din = new DigestInputStream(bin, MessageDigest.getInstance("MD5"))){
+
 			//Just to update the digest
 			byte[] dummy = new byte[4096];
-			for (int i = 1; i > 0; i = din.read(dummy)) ;
+			for (int i = 1; i > 0; i = din.read(dummy));
 			digestToReturn = din.getMessageDigest().digest();
+
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Caught Exception while generating a MessageDigest instance", e);
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException("File " + file.getName() + " not found", e);
 		} catch (IOException e) {
 			throw new IllegalStateException("Caught exception while reading from file", e);
-		} finally {
-			IOUtils.closeQuietly(din);
 		}
 		return digestToReturn;
 	}

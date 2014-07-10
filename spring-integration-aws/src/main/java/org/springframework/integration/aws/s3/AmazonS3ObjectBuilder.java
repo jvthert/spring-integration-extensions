@@ -37,7 +37,9 @@ import org.springframework.util.StringUtils;
  */
 public class AmazonS3ObjectBuilder {
 
-	private final static Logger logger = LoggerFactory.getLogger(AmazonS3Object.class);
+	private static final Logger logger = LoggerFactory.getLogger(AmazonS3Object.class);
+
+	public static final int CANNONICAL_ID_LENGTH = 64;
 
 	private File file;
 
@@ -173,9 +175,9 @@ public class AmazonS3ObjectBuilder {
 	private boolean isCanonicalId(String identifier) {
 		//Note: we do not check if the given id is a valid canonical id with AWS, we just check if it is in the right format
 		if (StringUtils.hasText(identifier)) {
-			if (identifier.length() == 64) {
+			if (identifier.length() == CANNONICAL_ID_LENGTH) {
 				String replacedString = identifier.trim().replaceAll("[a-fA-F0-9]+", "");
-				return replacedString.length() == 0;
+				return replacedString.isEmpty();
 			}
 		}
 		return false;
@@ -188,8 +190,8 @@ public class AmazonS3ObjectBuilder {
 	private boolean isGroupIdentifier(String identifier) {
 		if (StringUtils.hasText(identifier)) {
 			String trimmedIdentifier = identifier.trim();
-			return trimmedIdentifier.equals("http://acs.amazonaws.com/groups/global/AllUsers")
-					|| trimmedIdentifier.equals("http://acs.amazonaws.com/groups/global/AuthenticatedUsers");
+			return "http://acs.amazonaws.com/groups/global/AllUsers".equals(trimmedIdentifier)
+					|| "http://acs.amazonaws.com/groups/global/AuthenticatedUsers".equals(trimmedIdentifier);
 		}
 		return false;
 	}

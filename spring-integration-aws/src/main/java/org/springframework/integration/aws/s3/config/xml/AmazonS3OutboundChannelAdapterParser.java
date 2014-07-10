@@ -30,6 +30,11 @@ import org.springframework.integration.config.xml.IntegrationNamespaceUtils;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerWithGeneratedName;
+import static org.springframework.integration.config.xml.IntegrationNamespaceUtils.setReferenceIfAttributeDefined;
+import static org.springframework.integration.config.xml.IntegrationNamespaceUtils.setValueIfAttributeDefined;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * The namespace parser for outbound-channel-parser for the aws-s3 namespace
@@ -85,7 +90,7 @@ public class AmazonS3OutboundChannelAdapterParser extends
 
 		String s3Operations = element.getAttribute(S3_OPERATIONS);
 		String operationsService;
-		if (StringUtils.hasText(s3Operations)) {
+		if (hasText(s3Operations)) {
 			//custom implementation provided
 			if (element.hasAttribute(MULTIPART_THRESHOLD)
 					|| element.hasAttribute(TEMPORARY_DIRECTORY)
@@ -97,37 +102,37 @@ public class AmazonS3OutboundChannelAdapterParser extends
 			}
 			operationsService = s3Operations;
 		} else {
-			BeanDefinitionBuilder s3OpBuilder = BeanDefinitionBuilder.genericBeanDefinition(DefaultAmazonS3Operations.class);
+			BeanDefinitionBuilder s3OpBuilder = genericBeanDefinition(DefaultAmazonS3Operations.class);
 			s3OpBuilder.addConstructorArgReference(awsCredentialsGeneratedName);
-			IntegrationNamespaceUtils.setValueIfAttributeDefined(s3OpBuilder, element, MULTIPART_THRESHOLD);
-			IntegrationNamespaceUtils.setValueIfAttributeDefined(s3OpBuilder, element, TEMPORARY_DIRECTORY);
-			IntegrationNamespaceUtils.setValueIfAttributeDefined(s3OpBuilder, element, TEMPORARY_SUFFIX, "temporaryFileSuffix");
-			IntegrationNamespaceUtils.setReferenceIfAttributeDefined(s3OpBuilder, element, THREADPOOL_EXECUTOR);
-			IntegrationNamespaceUtils.setValueIfAttributeDefined(s3OpBuilder, element, AWS_ENDPOINT);
-			operationsService = BeanDefinitionReaderUtils.registerWithGeneratedName(s3OpBuilder.getBeanDefinition(), context.getRegistry());
+			setValueIfAttributeDefined(s3OpBuilder, element, MULTIPART_THRESHOLD);
+			setValueIfAttributeDefined(s3OpBuilder, element, TEMPORARY_DIRECTORY);
+			setValueIfAttributeDefined(s3OpBuilder, element, TEMPORARY_SUFFIX, "temporaryFileSuffix");
+			setReferenceIfAttributeDefined(s3OpBuilder, element, THREADPOOL_EXECUTOR);
+			setValueIfAttributeDefined(s3OpBuilder, element, AWS_ENDPOINT);
+			operationsService = registerWithGeneratedName(s3OpBuilder.getBeanDefinition(), context.getRegistry());
 		}
 
 		//Set the bucket and charset
 		builder.addConstructorArgReference(operationsService);
-		IntegrationNamespaceUtils.setValueIfAttributeDefined(builder, element, CHARSET);
+		setValueIfAttributeDefined(builder, element, CHARSET);
 		builder.addPropertyValue(S3_BUCKET, element.getAttribute(S3_BUCKET));        //Mandatory
 
 		//Get the remote directory expression or remote directory literal string
 		String remoteDirectoryLiteral = element.getAttribute(REMOTE_DIRECTORY);
 		String remoteDirectoryExpression = element.getAttribute(REMOTE_DIRECTORY_EXPRESSION);
-		boolean hasRemoteDirectoryExpression = StringUtils.hasText(remoteDirectoryExpression);
-		boolean hasRemoteDirectoryLiteral = StringUtils.hasText(remoteDirectoryLiteral);
+		boolean hasRemoteDirectoryExpression = hasText(remoteDirectoryExpression);
+		boolean hasRemoteDirectoryLiteral = hasText(remoteDirectoryLiteral);
 		if (!(hasRemoteDirectoryExpression ^ hasRemoteDirectoryLiteral)) {
 			throw new BeanDefinitionStoreException("Exactly one of " + REMOTE_DIRECTORY + " or "
 					+ REMOTE_DIRECTORY_EXPRESSION + " is required");
 		}
 		AbstractBeanDefinition expression;
 		if (hasRemoteDirectoryLiteral) {
-			expression = BeanDefinitionBuilder.genericBeanDefinition(LiteralExpression.class)
+			expression = genericBeanDefinition(LiteralExpression.class)
 					.addConstructorArgValue(remoteDirectoryLiteral)
 					.getBeanDefinition();
 		} else {
-			expression = BeanDefinitionBuilder.genericBeanDefinition(ExpressionFactoryBean.class)
+			expression = genericBeanDefinition(ExpressionFactoryBean.class)
 					.addConstructorArgValue(remoteDirectoryExpression)
 					.getBeanDefinition();
 		}
@@ -136,8 +141,8 @@ public class AmazonS3OutboundChannelAdapterParser extends
 		//Get the File generation strategy
 		String fileNameGenerator = element.getAttribute(FILE_NAME_GENERATOR);
 		String fileNameGenerationExpression = element.getAttribute(FILE_NAME_GENERATION_EXPRESSION);
-		boolean hasFileGenerator = StringUtils.hasText(fileNameGenerator);
-		boolean hasFileGenerationExpression = StringUtils.hasText(fileNameGenerationExpression);
+		boolean hasFileGenerator = hasText(fileNameGenerator);
+		boolean hasFileGenerationExpression = hasText(fileNameGenerationExpression);
 
 		if (hasFileGenerationExpression && hasFileGenerator) {
 			throw new BeanDefinitionStoreException("Attributes '" + FILE_NAME_GENERATION_EXPRESSION + "' and '"
@@ -147,10 +152,9 @@ public class AmazonS3OutboundChannelAdapterParser extends
 		if (hasFileGenerator) {
 			builder.addPropertyReference("fileNameGenerator", fileNameGenerator);
 		} else {
-			BeanDefinitionBuilder fileNameGeneratorBuilder =
-					BeanDefinitionBuilder.genericBeanDefinition(DefaultFileNameGenerationStrategy.class);
+			BeanDefinitionBuilder fileNameGeneratorBuilder = genericBeanDefinition(DefaultFileNameGenerationStrategy.class);
 			String tempDirectorySuffix = element.getAttribute(TEMPORARY_SUFFIX);
-			if (StringUtils.hasText(tempDirectorySuffix)) {
+			if (hasText(tempDirectorySuffix)) {
 				fileNameGeneratorBuilder.addPropertyValue("temporarySuffix", tempDirectorySuffix);
 			}
 			if (hasFileGenerationExpression) {
