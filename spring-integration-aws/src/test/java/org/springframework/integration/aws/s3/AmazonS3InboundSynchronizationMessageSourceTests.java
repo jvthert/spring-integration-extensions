@@ -213,6 +213,7 @@ public class AmazonS3InboundSynchronizationMessageSourceTests {
 		src.setFileNameRegex("[a-z]+\\.txt");
 		src.setRemoteDirectory("remotedirectory");
 		src.setMaxObjectsPerBatch(15);
+		src.setMaxNumberOfBatches(100);
 		src.setTemporarySuffix(".temp");
 		src.setAcceptSubFolders(true);
 		src.setDirectory(new LiteralExpression(temp.getRoot().getAbsolutePath()));
@@ -223,7 +224,7 @@ public class AmazonS3InboundSynchronizationMessageSourceTests {
 		assertEquals("testbucket", getPropertyValue(src, "bucket", String.class));
 		assertEquals(temp.getRoot(), getPropertyValue(src, "directory"));
 		assertEquals("[a-z]+\\.txt", getPropertyValue(src, "synchronizer.fileNameRegex", String.class));
-		assertEquals(true, getPropertyValue(src, "synchronizer.acceptSubFolders", Boolean.class).booleanValue());
+		assertEquals(true, getPropertyValue(src, "synchronizer.acceptSubFolders", Boolean.class));
 		assertEquals(15, getPropertyValue(src, "synchronizer.maxObjectsPerBatch", Integer.class).intValue());
 		assertEquals("remotedirectory", getPropertyValue(src, "remoteDirectory", String.class));
 	}
@@ -246,6 +247,7 @@ public class AmazonS3InboundSynchronizationMessageSourceTests {
 		src.setFileNameRegex("[a-z]+\\.txt");
 		src.setRemoteDirectory("/sub1");
 		src.setMaxObjectsPerBatch(15);
+		src.setMaxNumberOfBatches(100);
 		src.setTemporarySuffix(".temp");
 		src.setAcceptSubFolders(true);
 		src.setDirectory(new LiteralExpression(temp.getRoot().getAbsolutePath()));

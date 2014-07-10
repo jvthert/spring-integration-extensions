@@ -79,8 +79,7 @@ public class AmazonS3MessageHandlerTests {
 				holder.setS3Object((AmazonS3Object)args[3]);
 				return null;
 			}
-		}).
-		when(operations)
+		}).when(operations)
 		.putObject(anyString(), anyString(), anyString(), any(AmazonS3Object.class));
 
 

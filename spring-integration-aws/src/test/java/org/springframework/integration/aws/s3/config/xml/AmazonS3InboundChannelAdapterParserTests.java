@@ -53,7 +53,7 @@ public class AmazonS3InboundChannelAdapterParserTests {
 		assertEquals(".temp", getPropertyValue(source, "temporarySuffix"));
 		assertEquals(new File(System.getProperty("java.io.tmpdir")), getPropertyValue(source, "directory"));
 		assertEquals("remote", getPropertyValue(source, "remoteDirectory"));
-		assertEquals(true, getPropertyValue(source, "acceptSubFolders", Boolean.class).booleanValue());
+		assertEquals(true, getPropertyValue(source, "acceptSubFolders", Boolean.class));
 		assertEquals(100, getPropertyValue(source, "maxObjectsPerBatch", Integer.class).intValue());
 		assertEquals("[A-Za-z0-9]+\\\\.txt", getPropertyValue(source, "fileNameRegex"));
 

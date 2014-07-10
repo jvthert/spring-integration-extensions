@@ -19,8 +19,8 @@ repositories {
     maven { url 'http://vergaarbak.office:8081/nexus/content/groups/snapshots-remote/' }
 }
 
-def sourceCompatibility = 1.7
-def targetCompatibility = 1.7
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 // See http://www.gradle.org/docs/current/userguide/dependency_management.html#sub:configurations
 // and http://www.gradle.org/docs/current/dsl/org.gradle.api.artifacts.ConfigurationContainer.html
@@ -78,8 +78,9 @@ dependencies {
 	testCompile "org.mockito:mockito-all:$mockitoVersion"
 	testCompile "org.springframework:spring-test:$springVersion"
     testCompile "org.slf4j:slf4j-api:$slf4jVersion"
+    testCompile 'ch.qos.logback:logback-classic:1.1.2'
 
-	jacoco group: "org.jacoco", name: "org.jacoco.agent", version: "0.6.4.201312101107", classifier: "runtime"
+	jacoco group: "org.jacoco", name: "org.jacoco.agent", version: "0.7.1.201405082137", classifier: "runtime"
 
 }
 

@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  * The Default file name generation strategy. The strategy does the below steps for file name generation 1. The expression provided for generation of the file name, it is evaluated
  * and if a value is obtained, it is used. By default it used the value present in the file_name header. 2. Else, if the provided payload is of type {@link File}, then the name of
  * the file is used. if the file name ends with the temporary file suffix, the suffix is removed and the remainder of the file is used as the name. 3. If none of the above two are
- * provided, the file name is the <Message Id>.ext
+ * provided, the file name is the &lt;Message Id&gt;.ext
  * @author Amol Nayak
  * @since 0.5
  */
