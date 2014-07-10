@@ -59,6 +59,8 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 
 	private volatile int maxObjectsPerBatch;
 
+	private volatile int maxNumberOfBatches;
+
 	private volatile String fileNameWildcard;
 
 	private volatile String fileNameRegex;
@@ -134,6 +136,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 
 		InboundFileSynchronizationImpl synchronizationImpl = new InboundFileSynchronizationImpl(s3Operations, fileOperations);
 		synchronizationImpl.setSynchronizingBatchSize(maxObjectsPerBatch);
+		synchronizationImpl.setMaxNumberOfBatches(maxNumberOfBatches);
 
 		if (StringUtils.hasText(fileNameWildcard)) {
 			synchronizationImpl.setFileWildcard(fileNameWildcard);
@@ -175,6 +178,15 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	public void setMaxObjectsPerBatch(int maxObjectsPerBatch) {
 		Assert.isTrue(maxObjectsPerBatch > 0, "Provide a non sero, non negative number for max objects per batch");
 		this.maxObjectsPerBatch = maxObjectsPerBatch;
+	}
+
+	/**
+	 * Set the maximum number of batches to retrieve
+	 * @param maxNumberOfBatches
+	 */
+	public void setMaxNumberOfBatches(final int maxNumberOfBatches) {
+		Assert.isTrue(maxObjectsPerBatch > 0, "Provide a non sero, non negative number for max objects per sync");
+		this.maxNumberOfBatches = maxNumberOfBatches;
 	}
 
 	/**

@@ -117,14 +117,13 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 				((AbstractFileNameFilter) filter).setFolderName(remoteFolder);
 			}
 
-			int syncSize = 0;
-
 			if (nextMarker == null) {
 				logger.info("Startinf a fresh sync from S3");
 			} else {
 				logger.info("Continueing a sync from marker: {}", nextMarker);
 			}
 
+			int numberOfBatches = 0;
 			do {
 				PaginatedObjectsView paginatedView = client.listObjects(bucketName, remoteFolder, nextMarker, maxObjectsPerBatch);
 				if (paginatedView == null) {
@@ -133,7 +132,6 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 
 				nextMarker = paginatedView.getNextMarker();
 				List<S3ObjectSummary> summaries = paginatedView.getObjectSummary();
-				syncSize += summaries.size();
 				for (S3ObjectSummary summary : summaries) {
 					String key = summary.getKey();
 					if (key.endsWith("/") || !filter.accept(key)) {
@@ -144,7 +142,7 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 					AmazonS3Object s3Object = client.getObject(bucketName, "/", key);
 					synchronizeObjectWithFile(localDirectory, summary, s3Object);
 				}
-			} while (nextMarker != null && syncSize < maxNumberOfBatches);
+			} while (nextMarker != null && ++numberOfBatches < maxNumberOfBatches);
 		} finally {
 			lock.unlock();
 			logger.info("Sync completed");
