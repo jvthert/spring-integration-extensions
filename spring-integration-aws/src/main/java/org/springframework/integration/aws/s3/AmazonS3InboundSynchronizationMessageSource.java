@@ -16,6 +16,7 @@
 package org.springframework.integration.aws.s3;
 
 import java.io.File;
+import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import static org.springframework.integration.aws.s3.FileOperationType.CREATE;
+import static org.springframework.integration.aws.s3.FileOperationType.UPDATE;
+import static org.springframework.integration.support.MessageBuilder.withPayload;
 
 /**
  * The message source used to receive the File instances stored on the local file system synchronized from the S3
@@ -44,6 +48,8 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 		implements MessageSource<File>, FileEventHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(AmazonS3InboundSynchronizationMessageSource.class);
+
+	private static final EnumSet<FileOperationType> FILE_OPERATION_TYPES = EnumSet.of(CREATE, UPDATE);
 
 	private volatile InboundFileSynchronizer synchronizer;
 
@@ -88,7 +94,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 			headElement = filesQueue.poll();
 		}
 
-		return (headElement != null) ? MessageBuilder.withPayload(headElement).build() : null;
+		return (headElement == null) ? null : withPayload(headElement).build();
 	}
 
 	@Override
@@ -109,10 +115,7 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 		}
 
 		Assert.notNull(directory, "Please provide a valid local directory to synchronize the remote files");
-
-//		TODO: Uncomment this once we start supporting auto-create-local-directory
 		Assert.isTrue(directory.exists(), String.format("Provided directory %s does not exist", directoryPath));
-
 		Assert.isTrue(directory.isDirectory(), String.format("Provided path %s is not a directory", directoryPath));
 
 		//instantiate the S3Operations instance
@@ -149,10 +152,27 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 		synchronizationImpl.afterPropertiesSet();
 		this.synchronizer = synchronizationImpl;
 
-		filesQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+		filesQueue = new ArrayBlockingQueue<>(maxNumberOfBatches);
 	}
 
-	//-- For Spring DI
+	public void onEvent(FileEvent event) {
+		//We are interested in Create new file events only
+		if (FILE_OPERATION_TYPES.contains(event.getFileOperation())) {
+			try {
+				filesQueue.put(event.getFile());
+				/* The call hierarchy is if, no file found in queue, then receive()
+					-> InboundFileSynchronizer.synchronizeToLocalDirectory()
+					-> InboundLocalFileOperations.writeToFile()
+					-> onEvent()
+
+				   If the Queue is full and the thread blocks, the lock in synchronizeToLocalDirectory
+				   stays and hence preventing further concurrent synchronization
+				 */
+			} catch (InterruptedException e) {
+				logger.error("Interrupted while waiting to put the event on the filesQueue", e);
+			}
+		}
+	}
 
 	/**
 	 * Sets the AWSCredential instance to be used
@@ -260,26 +280,5 @@ public class AmazonS3InboundSynchronizationMessageSource extends IntegrationObje
 	public void setAwsEndpoint(String awsEndpoint) {
 		Assert.hasText(awsEndpoint, "Given AWS Endpoint has to be non null and non empty string");
 		this.awsEndpoint = awsEndpoint;
-	}
-
-	//----
-
-	public void onEvent(FileEvent event) {
-		//We are interested in Create new file events only
-		if (FileOperationType.CREATE == event.getFileOperation()) {
-			try {
-				filesQueue.put(event.getFile());
-				/* The call hierarchy is if, no file found in queue, then receive()
-					-> InboundFileSynchronizer.synchronizeToLocalDirectory()
-					-> InboundLocalFileOperations.writeToFile()
-					-> onEvent()
-
-				   If the Queue is full and the thread blocks, the lock in synchronizeToLocalDirectory
-				   stays and hence preventing further concurrent synchronization
-				 */
-			} catch (InterruptedException e) {
-				logger.error("Interrupted while waiting to put the event on the filesQueue", e);
-			}
-		}
 	}
 }

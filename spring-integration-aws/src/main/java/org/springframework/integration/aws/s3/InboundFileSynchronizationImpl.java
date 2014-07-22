@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,6 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 
 	public static final String CONTENT_MD5 = "Content-MD5";
 
-	public static final int MD5_HASH_LENGTH = 32;
-
 	private final AmazonS3Operations client;
 
 	private volatile int maxObjectsPerBatch = 10;        //default
@@ -67,6 +66,8 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 	private volatile boolean acceptSubFolders;
 
 	private volatile String nextMarker = null;
+
+	public static final Pattern ETAG_PATTERN = Pattern.compile("[a-f0-9A-F]{32}");
 
 	public InboundFileSynchronizationImpl(AmazonS3Operations client, InboundLocalFileOperations fileOperations) {
 		Assert.notNull(client, "AmazonS3Client should be non null");
@@ -118,9 +119,9 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 			}
 
 			if (nextMarker == null) {
-				logger.info("Startinf a fresh sync from S3");
+				logger.info("Starting a fresh sync from S3");
 			} else {
-				logger.info("Continueing a sync from marker: {}", nextMarker);
+				logger.info("Continuing a sync from marker: {}", nextMarker);
 			}
 
 			int numberOfBatches = 0;
@@ -274,11 +275,13 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 	/**
 	 * Checks if the given eTag is a MD5 hash as hex, the hash is 128 bit and hence has to be 32 characters in length, also it should contain only hex characters In case of multi
 	 * uploads, it is observed that the eTag contains a "-", and hence this method will return false.
-	 * @param eTag
+	 * @param eTag the eTag to check
 	 */
 	private boolean isEtagMD5Hash(String eTag) {
-		return !(eTag == null || eTag.length() != MD5_HASH_LENGTH) &&
-				eTag.replaceAll("[a-f0-9A-F]", "").isEmpty();
+		return !StringUtils.isEmpty(eTag) &&
+				eTag.length() == 32 &&
+				/* Only check this regex if length of the string is 32 */
+				ETAG_PATTERN.matcher(eTag).matches();
 	}
 
 	/* (non-Javadoc)
@@ -299,18 +302,11 @@ public class InboundFileSynchronizationImpl implements InboundFileSynchronizer {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#setFileNamePattern(java.lang.String)
-	 */
-
 	@Override
 	public void setFileNamePattern(String fileNameRegex) {
 		this.fileNameRegex = fileNameRegex;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.integration.aws.s3.InboundFileSynchronizer#setFileWildcard(java.lang.String)
-	 */
 
 	@Override
 	public void setFileWildcard(String fileWildcard) {
